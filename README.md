@@ -1,6 +1,6 @@
 # RailBow
 
-RailBow features a selection tool, found in shortcuts or by default bound to "ALT + Y".
+RailBow features a selection tool, found in shortcuts or can be bound to a keypress.
 
 With this tool you select rails and signals, and it will then automagically place tiles aroud the rails to make pretty patterns.
 
