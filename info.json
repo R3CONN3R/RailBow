@@ -1,0 +1,10 @@
+{
+    "name": "RailBow",
+    "title": "RailBow",
+    "version": "1.0.0",
+    "author": "DemonicLaxatives",
+    "factorio_version": "1.1",
+    "dependencies": ["base", "stdlib", "? Dectorio"],
+    "description": "A handy tool that helps you decorate rails.",
+    "homepage": "https://github.com/DemonicLaxatives/RailBow"
+}
