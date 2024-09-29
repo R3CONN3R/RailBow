@@ -9,15 +9,15 @@ local function main(e)
     for player_index, railbow_cache in pairs(global.railbow_tools) do
         local player = game.get_player(player_index)
         if not player then
-            return
+            goto countinue
         end
 
         if not railbow_cache.calculation_active then
-            return
+            goto countinue
         end
 
         if not (railbow_cache.last_step == railbow_cache.n_steps) then
-            return
+            goto countinue
         end
         local blueprint_tiles = {}
 
@@ -65,6 +65,8 @@ local function main(e)
         railbow_cache.last_step = 0
         railbow_cache.tile_map = {}
         global.railbow_tools[player_index] = railbow_cache
+
+        ::countinue::
     end
 end
 
