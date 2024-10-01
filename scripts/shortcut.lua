@@ -1,5 +1,3 @@
-local Event = require('__stdlib__/stdlib/event/event')
-
 local function on_shortcut(e)
     local name = e.input_name or e.prototype_name
     if name ~= "railbow-get-selection-tool" then
@@ -19,5 +17,11 @@ local function on_shortcut(e)
     player.cursor_stack.set_stack{name = "railbow-selection-tool", count = 1}
 end
 
-Event.register(defines.events.on_lua_shortcut, on_shortcut)
-Event.register("railbow-get-selection-tool", on_shortcut)
+local shotcuts = {}
+
+shotcuts.events = {
+    [defines.events.on_lua_shortcut] = on_shortcut, 
+    ["railbow-get-selection-tool"] = on_shortcut
+}
+
+return shotcuts

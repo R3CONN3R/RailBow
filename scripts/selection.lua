@@ -1,4 +1,3 @@
-local Event = require('__stdlib__/stdlib/event/event')
 local drive_directions = require("scripts.direction")
 
 local rail_list = {"curved-rail", "straight-rail"}
@@ -52,4 +51,10 @@ local function on_player_selected_area(e)
 
 end
 
-Event.register(defines.events.on_player_selected_area, on_player_selected_area)
+local selection = {}
+
+selection.events = {
+    [defines.events.on_player_selected_area] = on_player_selected_area
+}
+
+return selection

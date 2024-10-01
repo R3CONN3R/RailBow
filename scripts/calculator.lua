@@ -1,4 +1,3 @@
-local Event = require('__stdlib__/stdlib/event/event')
 local math2d = require("__core__.lualib.math2d")
 local masks = require("scripts.rail_masks")
 local drive_directions = require("scripts.direction")
@@ -72,6 +71,8 @@ local function work_batch(player_index, rail_calculations)
     global.railbow_tools[player_index] = railbow_cache
 end
 
+
+
 local function batch_jobs()
     local n_jobs = 0
     for _, railbow_cache in pairs(global.railbow_tools) do
@@ -92,4 +93,10 @@ local function batch_jobs()
     end
 end
 
-Event.register(defines.events.on_tick, batch_jobs)
+local calculator = {}
+
+calculator.events = {
+    [defines.events.on_tick] = batch_jobs
+}
+
+return calculator

@@ -1,10 +1,10 @@
 {
     "name": "RailBow",
     "title": "RailBow",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "author": "DemonicLaxatives",
     "factorio_version": "1.1",
-    "dependencies": ["base", "stdlib", "? Dectorio", "? tile-painter"],
+    "dependencies": ["base", "? Dectorio", "? tile-painter"],
     "description": "A handy tool that helps you decorate rails.",
     "homepage": "https://github.com/DemonicLaxatives/RailBow"
 }

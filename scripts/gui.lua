@@ -1,5 +1,3 @@
-local Event = require('__stdlib__/stdlib/event/event')
-
 local function create_config_frame(player)
     local frame = player.gui.screen.add{
         type = "frame",
@@ -126,6 +124,12 @@ local function selector_changed(event)
     end
 end
 
-Event.register(defines.events.on_gui_click, gui_click)
-Event.register(defines.events.on_gui_elem_changed, selector_changed)
-Event.register(defines.events.on_gui_closed, gui_closed)
+local gui = {}
+
+gui.events = {
+    [defines.events.on_gui_click] = gui_click,
+    [defines.events.on_gui_elem_changed] = selector_changed,
+    [defines.events.on_gui_closed] = gui_closed
+}
+
+return gui

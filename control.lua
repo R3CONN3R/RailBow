@@ -1,4 +1,4 @@
-local Event = require('__stdlib__/stdlib/event/event')
+local handler = require("__core__.lualib.event_handler")
 
 --- @class RailBowSelectionTool
 --- @field tiles table<integer, string>
@@ -60,16 +60,6 @@ local function create_button(player)
     end
 end
 
-Event.on_init(function()
-    --- @type table<integer, RailBowSelectionTool>
-    global.railbow_tools = {}
-    
-    for _, player in pairs(game.players) do
-        initialize_global(player)
-        create_button(player)
-    end
-end)
-
 local function on_player_created(e)
     local player = game.get_player(e.player_index)
     initialize_global(player)
@@ -80,11 +70,32 @@ local function on_player_removed(e)
     global.railbow_tools[e.player_index] = nil
 end
 
-Event.register(defines.events.on_player_created, on_player_created)
-Event.register(defines.events.on_player_removed, on_player_removed)
 
-require("scripts.shortcut")
-require("scripts.selection")
-require("scripts.gui")
-require("scripts.calculator")
-require("scripts.builder")
+
+local function on_init()
+    --- @type table<integer, RailBowSelectionTool>
+    global.railbow_tools = {}
+    
+    for _, player in pairs(game.players) do
+        initialize_global(player)
+        create_button(player)
+    end
+end
+
+local control = {}
+
+control.on_init = on_init
+
+control.events = {
+    [defines.events.on_player_created] = on_player_created,
+    [defines.events.on_player_removed] = on_player_removed,
+}
+
+handler.add_libraries({
+    control, 
+    require("scripts.shortcut"),
+    require("scripts.selection"),
+    require("scripts.gui"),
+    require("scripts.calculator"),
+    require("scripts.builder")
+})

@@ -1,5 +1,4 @@
 local math2d = require("__core__.lualib.math2d")
-local Event = require('__stdlib__/stdlib/event/event')
 
 local function entity_pos_to_built_pos(entity)
     return math2d.position.add(entity.position, {0.5, 0.5})
@@ -70,4 +69,9 @@ local function main(e)
     end
 end
 
-Event.register(defines.events.on_tick, main)
+local builder = {}
+builder.events = {
+    [defines.events.on_tick] = main
+}
+
+return builder
