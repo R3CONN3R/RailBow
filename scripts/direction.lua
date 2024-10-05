@@ -2,22 +2,22 @@
 -- SWeini - Train Signal Visualizer v0.1.1
 -- https://mods.factorio.com/mod/train-signal-visualizer
 -- MIT License
--- Copyright (c) 2019 Hadramal
--- Permission is hereby granted, free of charge, to any person obtaining a copy
--- of this software and associated documentation files (the "Software"), to deal
--- in the Software without restriction, including without limitation the rights
--- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
--- copies of the Software, and to permit persons to whom the Software is
--- furnished to do so, subject to the following conditions:
--- The above copyright notice and this permission notice shall be included in all
--- copies or substantial portions of the Software.
--- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
--- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
--- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
--- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
--- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
--- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
--- SOFTWARE.
+-- Copyright 2022 SWeini
+-- Permission is hereby granted, free of charge, to any person obtaining a 
+-- copy of this software and associated documentation files (the “Software”), 
+-- to deal in the Software without restriction, including without limitation 
+-- the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+-- and/or sell copies of the Software, and to permit persons to whom 
+-- the Software is furnished to do so, subject to the following conditions:
+-- The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+-- THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+-- INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+-- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+-- IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, 
+-- DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
+-- TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
+-- WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 
 local function get_rail_segment(rail, direction)
     local rail_end, dir_end = rail.get_rail_segment_end(direction)
@@ -171,16 +171,17 @@ local function calculate_rail_segments(entities)
     return result
 end
 
-local drive_directions = {
+--- @enum drive_directions
+local DRIVE_DIRECTIONS = {
     normal = 1,
     reversed = 2,
     omnidirectional = 3
 }
 
 local drive_direction_functions = {
-    [drive_directions.normal] = function(d) return d end,
-    [drive_directions.reversed] = function(d) return - d end,
-    [drive_directions.omnidirectional] = function(d) return math.abs(d) end
+    [DRIVE_DIRECTIONS.normal] = function(d) return d end,
+    [DRIVE_DIRECTIONS.reversed] = function(d) return - d end,
+    [DRIVE_DIRECTIONS.omnidirectional] = function(d) return math.abs(d) end
 }
 
 local function get_rail_drive_direction(rail, segments)
@@ -188,12 +189,12 @@ local function get_rail_drive_direction(rail, segments)
     local state_back = segments[get_segment_id(get_rail_segment(rail, defines.rail_direction.back))]
 
     if (state_back == segment_states.undefined) and (state_front ~= segment_states.undefined) then
-        return drive_directions.normal
+        return DRIVE_DIRECTIONS.normal
     end
     if (state_front == segment_states.undefined) and (state_back ~= segment_states.undefined) then
-        return drive_directions.reversed
+        return DRIVE_DIRECTIONS.reversed
     end
-    return drive_directions.omnidirectional
+    return DRIVE_DIRECTIONS.omnidirectional
 end
 
 local function get_all_rail_drive_directions(signals, rails)

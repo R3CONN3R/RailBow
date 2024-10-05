@@ -1,14 +1,37 @@
 local handler = require("__core__.lualib.event_handler")
 
---- @class RailBowSelectionTool
---- @field tiles table<integer, string>
---- @field blueprints LuaInventory
---- @field rails LuaEntity[]
---- @field drive_directions table<integer, integer>
---- @field calculation_active boolean
+--- @class IterationState
 --- @field n_steps integer
 --- @field last_step integer
+--- @field calculation_complete boolean
+
+--- @class MaskCalculation
+--- @field tiles table<integer, string>
+--- @field tiles_min integer
+--- @field tiles_max integer
+--- @field rails LuaEntity[]
+--- @field drive_directions table<integer, integer>
+--- @field p0 [integer, integer]
 --- @field tile_map table<integer, table<integer, table<integer, number>>>
+--- @field tile_array [integer, integer][]
+--- @field iteration_state IterationState
+
+--- @class BlueprintTile
+--- @field name string
+--- @field position [integer, integer]
+
+--- @class TileCalculation
+--- @field blueprint_tiles BlueprintTile[]
+--- @field iteration_state IterationState
+
+--- @class RailBowCalculation
+--- @field player_index integer
+--- @field inventory LuaInventory
+--- @field mask_calculation MaskCalculation
+--- @field tile_calculation TileCalculation
+
+--- @class RailBowSelectionTool
+--- @field tiles table<integer, string>
 
 local function initialize_global(player)
     if not player then
@@ -33,13 +56,6 @@ local function initialize_global(player)
 
         global.railbow_tools[player.index] = {
             tiles = init_tiles,
-            blueprints = game.create_inventory(1),
-            rails = {},
-            drive_directions = {},
-            calculation_active = false,
-            n_steps = 0,
-            last_step = 0,
-            tile_map = {},
         }
     end
 end
@@ -70,11 +86,11 @@ local function on_player_removed(e)
     global.railbow_tools[e.player_index] = nil
 end
 
-
-
 local function on_init()
     --- @type table<integer, RailBowSelectionTool>
     global.railbow_tools = {}
+    --- @type RailBowCalculation[]
+    global.railbow_calculation_queue = {}
     
     for _, player in pairs(game.players) do
         initialize_global(player)
@@ -97,5 +113,4 @@ handler.add_libraries({
     require("scripts.selection"),
     require("scripts.gui"),
     require("scripts.calculator"),
-    require("scripts.builder")
 })

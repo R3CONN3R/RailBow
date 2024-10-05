@@ -108,10 +108,6 @@ end
 local function selector_changed(event)
     local element = event.element
     local player_index = event.player_index
-    if global.railbow_tools[player_index].calculation_active then
-        game.print("There is an ongoing calculation for you, cannot change tiles at this moment.")
-        return
-    end
     if string.find(element.name, "railbow_tile_selector_") then
         local index = tonumber(string.match(element.name, "railbow_tile_selector_(%d+)"))
         if index then

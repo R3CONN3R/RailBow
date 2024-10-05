@@ -1,4 +1,14 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.0.3
+Date: 05.10.2024
+  Changes:
+    - Improved performance.
+    - RailBow selection tool can now be used while a calculation is ongoing.
+    - New selections will get added to the queue if a calculation is already ongoing.
+    - Added settings to control the number of rails and tiles per calculated per tick.
+  Info:
+    - This update will discard all ongoing calculations.
+---------------------------------------------------------------------------------------------------
 Version: 1.0.2
 Date: 01.10.2024
   Changes:

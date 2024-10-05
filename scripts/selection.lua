@@ -1,4 +1,5 @@
 local drive_directions = require("scripts.direction")
+local math2d = require("__core__.lualib.math2d")
 
 local rail_list = {"curved-rail", "straight-rail"}
 local signal_list = {"rail-signal", "rail-chain-signal"}
@@ -27,6 +28,10 @@ local function seperate_signals_and_rails(entities)
     return signals, rails
 end
 
+local function entity_pos_to_built_pos(entity)
+    return math2d.position.add(entity.position, {0.5, 0.5})
+end
+
 local function on_player_selected_area(e)
     if e.item ~= "railbow-selection-tool" then
         return
@@ -38,17 +43,72 @@ local function on_player_selected_area(e)
     if not player then
         return
     end
-    if global.railbow_tools[player.index].calculation_active then
-        game.print("There is an ongoing calculation for you, cannot start a new one.")
+
+    local has_tiles = false
+    for _, tile in pairs(global.railbow_tools[player.index].tiles) do
+        if tile ~= nil then
+            has_tiles = true
+            break
+        end
+    end
+    if not has_tiles then
         return
     end
 
-    local signals, rails = seperate_signals_and_rails(e.entities)
-    global.railbow_tools[player.index].rails = rails
-    global.railbow_tools[player.index].drive_directions = drive_directions.get_all(signals, rails)
-    global.railbow_tools[player.index].calculation_active = true
-    global.railbow_tools[player.index].n_steps = #rails
+    --- @type table<integer, string>
+    local tiles_copy = {}
+    local tiles_min = 8
+    local tiles_max = -8
+    for i, tile in pairs(global.railbow_tools[player.index].tiles) do
+        tiles_copy[i] = tile
+        if tile ~= nil then
+            if i < tiles_min then
+                tiles_min = i
+            end
+            if i > tiles_max then
+                tiles_max = i
+            end
+        end
+    end
 
+    local signals, rails = seperate_signals_and_rails(e.entities)
+    
+    --- @type MaskCalculation
+    local mask_calculation = {
+        tiles = tiles_copy,
+        tiles_min = tiles_min,
+        tiles_max = tiles_max,
+        rails = rails,
+        drive_directions = drive_directions.get_all(signals, rails),
+        p0 = entity_pos_to_built_pos(rails[1]),
+        tile_map = {},
+        tile_array = {},
+        iteration_state = {
+            n_steps = #rails,
+            last_step = 0,
+            calculation_complete = false
+        }
+    }
+
+    --- @type TileCalculation
+    local tile_calculation = {
+        blueprint_tiles = {},
+        iteration_state = {
+            n_steps = 0,
+            last_step = 0,
+            calculation_complete = false
+        }
+    }
+
+    --- @type RailBowCalculation
+    local railbow_calculation = {
+        player_index = player.index,
+        inventory = game.create_inventory(1),
+        mask_calculation = mask_calculation,
+        tile_calculation = tile_calculation
+    }
+
+    table.insert(global.railbow_calculation_queue, railbow_calculation)
 end
 
 local selection = {}

@@ -20,7 +20,7 @@ end
 local shotcuts = {}
 
 shotcuts.events = {
-    [defines.events.on_lua_shortcut] = on_shortcut, 
+    [defines.events.on_lua_shortcut] = on_shortcut,
     ["railbow-get-selection-tool"] = on_shortcut
 }
 
