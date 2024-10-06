@@ -30,8 +30,14 @@ local handler = require("__core__.lualib.event_handler")
 --- @field mask_calculation MaskCalculation
 --- @field tile_calculation TileCalculation
 
---- @class RailBowSelectionTool
+--- @class RailBowConfig
+--- @field name string
 --- @field tiles table<integer, string>
+
+--- @class RailBowSelectionTool
+--- @field presets RailBowConfig[]
+--- @field selected_preset integer
+--- @field opened_preset integer
 
 local function initialize_global(player)
     if not player then
@@ -54,8 +60,18 @@ local function initialize_global(player)
             end
         end
 
-        global.railbow_tools[player.index] = {
+        --- @type RailBowConfig
+        local init_config = {
+            name = "default",
             tiles = init_tiles,
+            mode = "vote"
+        }
+
+        global.railbow_tools[player.index] = {
+            presets = {init_config},
+            selected_preset = 1,
+            opened_preset = 1
+
         }
     end
 end

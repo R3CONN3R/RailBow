@@ -2,8 +2,6 @@ local math2d = require("__core__.lualib.math2d")
 local masks = require("scripts.rail_masks")
 local drive_directions = require("scripts.direction")
 
-local tile_calculations_per_tick = 1000
-
 local function entity_pos_to_built_pos(entity)
     return math2d.position.add(entity.position, {0.5, 0.5})
 end
@@ -74,6 +72,60 @@ local function do_mask_accumulation(railbow_calculation)
     return railbow_calculation
 end
 
+--- @param tile_weights table<integer, number>
+--- @return integer
+local function weighted_tile_vote(tile_weights)
+    local max = 0
+    local max_d = 0
+    for d, w in pairs(tile_weights) do
+        if w > max then
+            max = w
+            max_d = d
+        end
+    end
+    return max_d
+end
+
+function round(x)
+    return x>=0 and math.floor(x+0.5) or math.ceil(x-0.5)
+end
+
+--- @param tile_weights table<integer, number>
+--- @return integer
+local function weighted_tile_average(tile_weights)
+    local total = 0
+    local sum = 0
+    for d, w in pairs(tile_weights) do
+        total = total + w
+        sum = sum + w * d
+    end
+    local result = round(sum / total)
+    if result == 0 then
+        return 1
+    end
+    return result
+end
+
+--- @param tile_weights table<integer, number>
+--- @return integer
+local function nearest_tile(tile_weights)
+    local min = math.huge
+    local min_d = 0
+    for d, _ in pairs(tile_weights) do
+        if math.abs(d) < min then
+            min = math.abs(d)
+            min_d = d
+        end
+    end
+    return min_d
+end
+
+local methods = {
+    vote = weighted_tile_vote,
+    average = weighted_tile_average,
+    nearest = nearest_tile
+}
+
 ---@param railbow_calculation RailBowCalculation
 ---@return RailBowCalculation
 local function do_tile_picking(railbow_calculation)
@@ -91,16 +143,10 @@ local function do_tile_picking(railbow_calculation)
     local i1 = math.min(iteration_state.last_step + tile_calculations_per_tick, iteration_state.n_steps)
 
     for i = i0, i1 do
-        local pos = tile_array[i]
-        local max = 0
-        local max_d = 0
-        for d, w in pairs(tile_map[pos[1]][pos[2]]) do
-            if w > max then
-                max = w
-                max_d = d
-            end
-        end
-        local name = tiles[max_d]
+        local pos = {x = tile_array[i][1], y = tile_array[i][2]}
+        local tile_weights = tile_map[pos.x][pos.y]
+        local d = methods.vote(tile_weights)
+        local name = tiles[d]
         if name then
             table.insert(blueprint_tiles, {name = name, position = pos})
         end

@@ -1,4 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.1.0
+Date: 06.10.2024
+  Changes:
+    - Upgraded GUI
+  Features:
+    - Create multiple tile presets.
+    - Switch between tile presets.
+    - Copy tile presets.
+---------------------------------------------------------------------------------------------------
 Version: 1.0.3
 Date: 05.10.2024
   Changes:

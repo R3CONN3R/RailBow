@@ -44,8 +44,11 @@ local function on_player_selected_area(e)
         return
     end
 
+    local selection_tool = global.railbow_tools[player.index]
+    local tiles = selection_tool.presets[selection_tool.selected_preset].tiles
+
     local has_tiles = false
-    for _, tile in pairs(global.railbow_tools[player.index].tiles) do
+    for _, tile in pairs(tiles) do
         if tile ~= nil then
             has_tiles = true
             break
@@ -59,7 +62,7 @@ local function on_player_selected_area(e)
     local tiles_copy = {}
     local tiles_min = 8
     local tiles_max = -8
-    for i, tile in pairs(global.railbow_tools[player.index].tiles) do
+    for i, tile in pairs(tiles) do
         tiles_copy[i] = tile
         if tile ~= nil then
             if i < tiles_min then
@@ -72,7 +75,7 @@ local function on_player_selected_area(e)
     end
 
     local signals, rails = seperate_signals_and_rails(e.entities)
-    
+
     --- @type MaskCalculation
     local mask_calculation = {
         tiles = tiles_copy,
