@@ -48,15 +48,7 @@ local function initialize_global(player)
         local init_tiles = {}
         for i = -8, 8 do
             if i ~= 0 then
-                if math.abs(i) == 1 then
-                    init_tiles[i] = "refined-concrete"
-                elseif math.abs(i) == 2 then 
-                    init_tiles[i] = "concrete"
-                elseif math.abs(i) == 3 then
-                    init_tiles[i] = "stone-path"
-                else
-                    init_tiles[i] = nil
-                end
+                init_tiles[i] = nil
             end
         end
 
@@ -100,6 +92,11 @@ end
 
 local function on_player_removed(e)
     global.railbow_tools[e.player_index] = nil
+    for i, data in pairs(global.railbow_calculation_queue) do
+        if data.player_index == e.player_index then
+            table.remove(global.railbow_calculation_queue, i)
+        end
+    end
 end
 
 local function on_init()
