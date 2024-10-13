@@ -24,6 +24,9 @@ local function change_preset(player, index)
 
     local railbow_tool = global.railbow_tools[player.index]
     local opened_preset = railbow_tool.opened_preset
+    if not railbow_tool.presets[opened_preset].tiles then
+        railbow_tool.presets[opened_preset].tiles = {}
+    end
     local opened_tiles = railbow_tool.presets[opened_preset].tiles
 
     gui_layout.add_preset_list(player.gui.screen.railbow_window.configuration_flow.preset_selection_frame, "opened")

@@ -203,6 +203,9 @@ local function add_choose_elem_table(frame)
 
     local railbow_tool = global.railbow_tools[frame.player_index]
     local selected_preset = railbow_tool.opened_preset
+    if not railbow_tool.presets[selected_preset].tiles then
+        railbow_tool.presets[selected_preset].tiles = {}
+    end
     local selected_tiles = railbow_tool.presets[selected_preset].tiles
 
     for i = -8, 8 do
