@@ -54,6 +54,3 @@ jobs:
           asset_path: ./${{ steps.get_info.outputs.repo_name }}_${{ steps.get_info.outputs.version }}.zip
           asset_name: ${{ steps.get_info.outputs.repo_name }}_${{ steps.get_info.outputs.version }}.zip
           asset_content_type: application/zip
-
-      - name: Provide download link
-        run: echo "Download the zip from: ${{ steps.create_release.outputs.html_url }}"
