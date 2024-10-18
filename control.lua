@@ -37,7 +37,7 @@ local handler = require("__core__.lualib.event_handler")
 --- @class RailBowSelectionTool
 --- @field presets RailBowConfig[]
 --- @field selected_preset integer
---- @field opened_preset integer
+--- @field opened_preset integer|nil
 
 local function initialize_global(player)
     if not player then
@@ -62,7 +62,7 @@ local function initialize_global(player)
         global.railbow_tools[player.index] = {
             presets = {init_config},
             selected_preset = 1,
-            opened_preset = 1
+            opened_preset = nil
 
         }
     end

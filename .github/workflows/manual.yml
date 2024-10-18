@@ -3,7 +3,7 @@ name: Create Release
 on:
   push:
     tags:
-      - 'v*.*.*'  # This runs when a version tag is pushed, adjust pattern as needed
+      - 'v*.*.*'
 
 jobs:
   create-zip-and-release:
@@ -26,7 +26,7 @@ jobs:
           version="${{ steps.get_info.outputs.version }}"
           name="${{ steps.get_info.outputs.repo_name }}"
           zip_name="${name}_${version}.zip"
-          zip -r $zip_name . -x "demo/*"
+          zip -r $zip_name . -x "demo/*" -x ".github/*"
 
       - name: Upload zip as artifact
         uses: actions/upload-artifact@v3
