@@ -1,0 +1,59 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # This runs when a version tag is pushed, adjust pattern as needed
+
+jobs:
+  create-zip-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Read version and name from info.json
+        id: get_info
+        run: |
+          version=$(jq -r '.version' info.json)
+          name=$(jq -r '.name' info.json)
+          echo "::set-output name=version::$version"
+          echo "::set-output name=repo_name::$name"
+        
+      - name: Create zip archive excluding "demo" folder
+        run: |
+          version="${{ steps.get_info.outputs.version }}"
+          name="${{ steps.get_info.outputs.repo_name }}"
+          zip_name="${name}_${version}.zip"
+          zip -r $zip_name . -x "demo/*"
+
+      - name: Upload zip as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: repo_zip
+          path: ./${{ steps.get_info.outputs.repo_name }}_${{ steps.get_info.outputs.version }}.zip
+
+      - name: Create a release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+
+      - name: Upload asset to release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./${{ steps.get_info.outputs.repo_name }}_${{ steps.get_info.outputs.version }}.zip
+          asset_name: ${{ steps.get_info.outputs.repo_name }}_${{ steps.get_info.outputs.version }}.zip
+          asset_content_type: application/zip
+
+      - name: Provide download link
+        run: echo "Download the zip from: ${{ steps.create_release.outputs.html_url }}"
