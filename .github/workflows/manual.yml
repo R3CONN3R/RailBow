@@ -57,3 +57,9 @@ jobs:
           asset_path: ./${{ steps.get_info.outputs.repo_name }}_${{ steps.get_info.outputs.version }}.zip
           asset_name: ${{ steps.get_info.outputs.repo_name }}_${{ steps.get_info.outputs.version }}.zip
           asset_content_type: application/zip
+
+      - name: Publish to Factorio Mod Portal
+        uses: shanemadden/factorio-mod-portal-publish@v2
+        with:
+          api_token: ${{ secrets.FACTORIO_API_KEY }}
+          mod_file: ./${{ steps.get_info.outputs.repo_name }}_${{ steps.get_info.outputs.version }}.zip
