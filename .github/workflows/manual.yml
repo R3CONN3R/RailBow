@@ -26,7 +26,7 @@ jobs:
           version="${{ steps.get_info.outputs.version }}"
           name="${{ steps.get_info.outputs.repo_name }}"
           zip_name="${name}_${version}.zip"
-          zip -r $zip_name . -x "demo/*" -x ".github/*"
+          zip -r $zip_name . -x "demo/*" -x ".github/*" -x ".git/*" 
 
       - name: Upload zip as artifact
         uses: actions/upload-artifact@v3
