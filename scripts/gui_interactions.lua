@@ -46,11 +46,6 @@ function lib.close_preset(player)
     if conf.tile_selection_frame then
         conf.tile_selection_frame.destroy()
     end
-    -- if railbow_tool.opened_preset then
-    --     local list = conf.selection_frame.preset_list
-    --     local flow = list["preset_flow_" .. railbow_tool.opened_preset]
-    --     flow.preset_button.toggled = false
-    -- end
     railbow_tool.opened_preset = nil
 
 end
@@ -152,5 +147,38 @@ function lib.change_selected_preset(player, index)
     railbow_tool.selected_preset = index
 end
 
+function lib.tile_selector_clicked(event)
+    local element = event.element
+    local player_index = event.player_index
+    local player = game.get_player(player_index)
+    if not player then return end
+    if not element.name:find("tile_selector_") then return end
+
+    local index = tonumber(element.name:match("([+-]?%d+)$"))
+    if not index then return end
+
+    local railbow_tool = global.railbow_tools[player_index]
+    local window = player.gui.screen.railbow_window
+    local frame = window.configuration_flow.tile_selection_frame
+    local selector = frame.table["tile_selector_" .. index]
+    if event.shift then
+        if event.button == defines.mouse_button_type.right then
+            railbow_tool.copied_tile = railbow_tool.presets[railbow_tool.opened_preset].tiles[index]
+            selector.elem_value = railbow_tool.copied_tile
+        elseif event.button == defines.mouse_button_type.left then
+            if railbow_tool.copied_tile then
+                railbow_tool.presets[railbow_tool.opened_preset].tiles[index] = railbow_tool.copied_tile
+                selector.elem_value = railbow_tool.copied_tile
+                return true
+            end
+        end
+    else
+        if event.button == defines.mouse_button_type.right then
+            railbow_tool.presets[railbow_tool.opened_preset].tiles[index] = nil
+            selector.elem_value = nil
+        end
+    end
+    return false
+end
 
 return lib

@@ -32,7 +32,7 @@ function lib.main_title_bar(frame)
 
     title_bar.add{
         type = "sprite-button",
-        name = "railbow_close_button",
+        name = "close_button",
         sprite = "utility/close_white",
         style = "frame_action_button",
         mouse_button_filter = {"left"}
@@ -55,7 +55,7 @@ function lib.preset_list_header(frame)
 
     header.add{
         type = "sprite-button",
-        name = "railbow_add_preset_button",
+        name = "add_preset_button",
         style = "tool_button_green",
         sprite = "utility/add",
         tooltip = {"tooltips.railbow-add-preset"}
@@ -63,7 +63,7 @@ function lib.preset_list_header(frame)
 
     header.add{
         type = "sprite-button",
-        name = "railbow_copy_preset_button",
+        name = "copy_preset_button",
         style = "tool_button",
         sprite = "utility/copy",
         tooltip = {"tooltips.railbow-copy-preset"}
@@ -165,7 +165,6 @@ function lib.populate_preset_list(list)
             elem.preset_selection.state = true
         end
         if i == railbow_tool.opened_preset then
-            elem.preset_button.toggled = true
         end
     end
 end
@@ -194,7 +193,7 @@ function lib.elem_choose_header(frame)
 
     header.add{
         type = "sprite-button",
-        name = "railbow_delete_preset_button",
+        name = "delete_preset_button",
         sprite = "utility/trash",
         tooltip = {"tooltips.railbow-delete-preset"},
         style = "tool_button_red",

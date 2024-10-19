@@ -2,17 +2,17 @@ local layout = require("scripts.gui_layout")
 local interactions = require("scripts.gui_interactions")
 local elements = require("scripts.gui_elements")
 
-local function open_gui(player)
-    if player.gui.screen.railbow_window then
-        player.gui.screen.railbow_window.destroy()
-    else
-        layout.create_railbow_window(player)
-    end
-end
-
 local function close_gui(player)
     if player.gui.screen.railbow_window then
         player.gui.screen.railbow_window.destroy()
+    end
+end
+
+local function open_gui(player)
+    if player.gui.screen.railbow_window then
+        close_gui(player)
+    else
+        layout.create_railbow_window(player)
     end
 end
 
@@ -22,21 +22,28 @@ local function gui_click(e)
     local player = game.get_player(e.player_index)
     if not player then return end
 
+    if element.get_mod() ~= "RailBow" then return end
     if element.name == "railbow_button" then
         open_gui(player)
-    elseif element.name == "railbow_close_button" then
+    elseif element.name == "close_button" then
         close_gui(player)
-    elseif element.name == "railbow_add_preset_button" then
+    elseif element.name == "add_preset_button" then
         interactions.add_preset(player)
     elseif element.name == "preset_button" then
         local index = tonumber(element.parent.name:match("([+-]?%d+)$"))
         if index then
             interactions.change_opened_preset(player, index, element.toggled)
         end
-    elseif element.name == "railbow_delete_preset_button" then
+    elseif element.name == "delete_preset_button" then
         interactions.delete_preset(player)
-    elseif element.name == "railbow_copy_preset_button" then
+    elseif element.name == "copy_preset_button" then
         interactions.copy_preset(player)
+    elseif element.name:find("tile_selector_") then
+        local reset_gui = interactions.tile_selector_clicked(e)
+        if reset_gui then
+            close_gui(player)
+            open_gui(player)
+        end
     end
 end
 
@@ -54,8 +61,10 @@ local function selector_changed(event)
     if string.find(element.name, "tile_selector_") then
         local index = tonumber(element.name:match("([+-]?%d+)$"))
         if index then
-            local opened_preset = global.railbow_tools[player_index].opened_preset
-            global.railbow_tools[player_index].presets[opened_preset].tiles[index] = element.elem_value
+            if element.elem_value then
+                local opened_preset = global.railbow_tools[player_index].opened_preset
+                global.railbow_tools[player_index].presets[opened_preset].tiles[index] = element.elem_value
+            end
         end
     end
 end

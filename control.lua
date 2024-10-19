@@ -16,12 +16,7 @@ local handler = require("__core__.lualib.event_handler")
 --- @field tile_array [integer, integer][]
 --- @field iteration_state IterationState
 
---- @class BlueprintTile
---- @field name string
---- @field position [integer, integer]
-
 --- @class TileCalculation
---- @field blueprint_tiles BlueprintTile[]
 --- @field iteration_state IterationState
 
 --- @class RailBowCalculation
@@ -38,6 +33,7 @@ local handler = require("__core__.lualib.event_handler")
 --- @field presets RailBowConfig[]
 --- @field selected_preset integer
 --- @field opened_preset integer|nil
+--- @field copied_tile string|nil
 
 local function initialize_global(player)
     if not player then
@@ -62,8 +58,8 @@ local function initialize_global(player)
         global.railbow_tools[player.index] = {
             presets = {init_config},
             selected_preset = 1,
-            opened_preset = nil
-
+            opened_preset = nil,
+            copied_tile = nil
         }
     end
 end

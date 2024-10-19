@@ -133,7 +133,7 @@ local function do_tile_picking(railbow_calculation)
     local tile_calculation = railbow_calculation.tile_calculation
 
     local iteration_state = tile_calculation.iteration_state
-    local blueprint_tiles = tile_calculation.blueprint_tiles
+    local blueprint_tiles = {}
     local tile_map = mask_calculation.tile_map
     local tile_array = mask_calculation.tile_array
     local tiles = mask_calculation.tiles
@@ -152,11 +152,27 @@ local function do_tile_picking(railbow_calculation)
         end
     end
 
+    railbow_calculation.inventory.insert({name = "blueprint", count = 1})
+    local blueprint = railbow_calculation.inventory[1]
+    blueprint.blueprint_absolute_snapping = true
+    blueprint.blueprint_snap_to_grid = {x = 1, y = 1}
+    blueprint.blueprint_position_relative_to_grid = { x = 0, y = 0 }
+    blueprint.set_blueprint_tiles(blueprint_tiles)
+
+    blueprint.build_blueprint{
+        surface = railbow_calculation.mask_calculation.rails[1].surface,
+        force = game.players[railbow_calculation.player_index].force,
+        position = railbow_calculation.mask_calculation.p0,
+        force_build = true,
+        by_player = game.players[railbow_calculation.player_index],
+        create_build_effect_smoke = false,
+    }
+    railbow_calculation.inventory.clear()
+
     iteration_state.last_step = i1
     if iteration_state.last_step == iteration_state.n_steps then
         iteration_state.calculation_complete = true
     end
-    tile_calculation.blueprint_tiles = blueprint_tiles
     tile_calculation.iteration_state = iteration_state
     railbow_calculation.tile_calculation = tile_calculation
     return railbow_calculation
@@ -182,22 +198,6 @@ local function work()
             return
         end
     end
-
-    railbow_calculation.inventory.insert({name = "blueprint", count = 1})
-    local blueprint = railbow_calculation.inventory[1]
-    blueprint.blueprint_absolute_snapping = true
-    blueprint.blueprint_snap_to_grid = {x = 1, y = 1}
-    blueprint.blueprint_position_relative_to_grid = { x = 0, y = 0 }
-    blueprint.set_blueprint_tiles(railbow_calculation.tile_calculation.blueprint_tiles)
-
-    blueprint.build_blueprint{
-        surface = railbow_calculation.mask_calculation.rails[1].surface,
-        force = game.players[railbow_calculation.player_index].force,
-        position = railbow_calculation.mask_calculation.p0,
-        force_build = true,
-        by_player = game.players[railbow_calculation.player_index],
-        create_build_effect_smoke = false,
-    }
 
     table.remove(global.railbow_calculation_queue, 1)
 end
