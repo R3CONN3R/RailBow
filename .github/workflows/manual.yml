@@ -27,7 +27,7 @@ jobs:
           name="${{ steps.get_info.outputs.repo_name }}"
           zip_name="${name}_${version}.zip"
           mkdir $name
-          rsync -av --progress ./ $name --exclude demo --exclude .github --exclude .git
+          rsync -av --progress ./ $name --exclude demo --exclude .github --exclude .git --exclude .gitignore
           zip -r $zip_name $name
           rm -rf $name
 
