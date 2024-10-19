@@ -26,10 +26,14 @@ local function do_mask_accumulation(railbow_calculation)
     local tile_max = mask_calculation.tiles_max
     local tile_map = mask_calculation.tile_map
     local tile_array = mask_calculation.tile_array
+    local offset = not railbow_calculation.tile_calculation.instant_build
 
     for i = i0, i1 do
         local entity = mask_calculation.rails[i]
-        local pos_i = math2d.position.subtract(entity_pos_to_built_pos(entity), p0)
+        local pos_i = entity_pos_to_built_pos(entity)
+        if offset then
+            pos_i = math2d.position.subtract(entity_pos_to_built_pos(entity), p0)
+        end
         local mask = masks[entity.name][entity.direction]
         for d, elem_i in pairs(mask) do
 
@@ -151,23 +155,26 @@ local function do_tile_picking(railbow_calculation)
             table.insert(blueprint_tiles, {name = name, position = pos})
         end
     end
+    if tile_calculation.instant_build then
+        railbow_calculation.mask_calculation.rails[1].surface.set_tiles(blueprint_tiles)
+    else
+        railbow_calculation.inventory.insert({name = "blueprint", count = 1})
+        local blueprint = railbow_calculation.inventory[1]
+        blueprint.blueprint_absolute_snapping = true
+        blueprint.blueprint_snap_to_grid = {x = 1, y = 1}
+        blueprint.blueprint_position_relative_to_grid = { x = 0, y = 0 }
+        blueprint.set_blueprint_tiles(blueprint_tiles)
 
-    railbow_calculation.inventory.insert({name = "blueprint", count = 1})
-    local blueprint = railbow_calculation.inventory[1]
-    blueprint.blueprint_absolute_snapping = true
-    blueprint.blueprint_snap_to_grid = {x = 1, y = 1}
-    blueprint.blueprint_position_relative_to_grid = { x = 0, y = 0 }
-    blueprint.set_blueprint_tiles(blueprint_tiles)
-
-    blueprint.build_blueprint{
-        surface = railbow_calculation.mask_calculation.rails[1].surface,
-        force = game.players[railbow_calculation.player_index].force,
-        position = railbow_calculation.mask_calculation.p0,
-        force_build = true,
-        by_player = game.players[railbow_calculation.player_index],
-        create_build_effect_smoke = false,
-    }
-    railbow_calculation.inventory.clear()
+        blueprint.build_blueprint{
+            surface = railbow_calculation.mask_calculation.rails[1].surface,
+            force = game.players[railbow_calculation.player_index].force,
+            position = railbow_calculation.mask_calculation.p0,
+            force_build = true,
+            by_player = game.players[railbow_calculation.player_index],
+            create_build_effect_smoke = false,
+        }
+        railbow_calculation.inventory.clear()
+    end
 
     iteration_state.last_step = i1
     if iteration_state.last_step == iteration_state.n_steps then

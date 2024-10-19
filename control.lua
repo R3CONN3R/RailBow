@@ -17,6 +17,7 @@ local handler = require("__core__.lualib.event_handler")
 --- @field iteration_state IterationState
 
 --- @class TileCalculation
+--- @field instant_build boolean
 --- @field iteration_state IterationState
 
 --- @class RailBowCalculation

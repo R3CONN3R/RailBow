@@ -52,6 +52,16 @@ end
 
 --- @param player LuaPlayer
 --- @param index integer
+function lib.change_selected_preset(player, index)
+    local railbow_tool = global.railbow_tools[player.index]
+    local gui_list = player.gui.screen.railbow_window.configuration_flow.selection_frame.preset_list
+    gui_list["preset_flow_" .. railbow_tool.selected_preset].preset_selection.state = false
+    gui_list["preset_flow_" .. index].preset_selection.state = true
+    railbow_tool.selected_preset = index
+end
+
+--- @param player LuaPlayer
+--- @param index integer
 --- @param toggled boolean
 function lib.change_opened_preset(player, index, toggled)
     local railbow_tool = global.railbow_tools[player.index]
@@ -64,12 +74,9 @@ function lib.change_opened_preset(player, index, toggled)
         return
     end
     railbow_tool.opened_preset = index
+    lib.change_selected_preset(player, index)
     if not previous_index then
         lib.open_preset(conflow)
-        return
-    end
-    if previous_index == index then
-        player.print("err")
         return
     end
     
@@ -126,6 +133,7 @@ end
 function lib.copy_preset(player)
     local railbow_tool = global.railbow_tools[player.index]
     local opened_preset = railbow_tool.opened_preset
+    if not opened_preset then return end
     local presets = railbow_tool.presets
     local n_presets = #presets
 
@@ -137,14 +145,6 @@ function lib.copy_preset(player)
 
     table.insert(presets, new_preset)
     gui_elements.preset_selector(player.gui.screen.railbow_window.configuration_flow.selection_frame.preset_list, n_presets + 1)
-end
-
-function lib.change_selected_preset(player, index)
-    local railbow_tool = global.railbow_tools[player.index]
-    local gui_list = player.gui.screen.railbow_window.configuration_flow.selection_frame.preset_list
-    gui_list["preset_flow_" .. railbow_tool.selected_preset].preset_selection.state = false
-    gui_list["preset_flow_" .. index].preset_selection.state = true
-    railbow_tool.selected_preset = index
 end
 
 function lib.tile_selector_clicked(event)

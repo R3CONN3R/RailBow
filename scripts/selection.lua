@@ -32,18 +32,7 @@ local function entity_pos_to_built_pos(entity)
     return math2d.position.add(entity.position, {0.5, 0.5})
 end
 
-local function on_player_selected_area(e)
-    if e.item ~= "railbow-selection-tool" then
-        return
-    end
-    if not next(e.entities) then
-        return
-    end
-    local player = game.get_player(e.player_index)
-    if not player then
-        return
-    end
-
+local function set_up_calculation(player, e)
     local selection_tool = global.railbow_tools[player.index]
     local tiles = selection_tool.presets[selection_tool.selected_preset].tiles
 
@@ -93,9 +82,20 @@ local function on_player_selected_area(e)
         }
     }
 
+    local instant_build = false
+    if settings.get_player_settings(player)["railbow-instant-build"].value then
+        if player.cheat_mode then
+            instant_build = true
+        elseif player.controller_type == defines.controllers.editor then
+            instant_build = true
+        elseif player.controller_type == defines.controllers.god then
+            instant_build = true
+        end
+    end
+
     --- @type TileCalculation
     local tile_calculation = {
-        blueprint_tiles = {},
+        instant_build = instant_build,
         iteration_state = {
             n_steps = 0,
             last_step = 0,
@@ -112,6 +112,20 @@ local function on_player_selected_area(e)
     }
 
     table.insert(global.railbow_calculation_queue, railbow_calculation)
+end
+
+local function on_player_selected_area(e)
+    if e.item ~= "railbow-selection-tool" then
+        return
+    end
+    if not next(e.entities) then
+        return
+    end
+    local player = game.get_player(e.player_index)
+    if not player then
+        return
+    end
+    set_up_calculation(player, e)
 end
 
 local selection = {}

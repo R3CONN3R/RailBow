@@ -92,7 +92,7 @@ function lib.preset_selector(list, index)
     local railbow_tool = util.table.deepcopy(global.railbow_tools[list.player_index])
     local preset = railbow_tool.presets[index]
 
-    flow.style.width = 175
+    flow.style.width = 185
 
     flow.add{
         type = "radiobutton",
@@ -109,7 +109,7 @@ function lib.preset_selector(list, index)
         auto_toggle = true,
         toggled = index == railbow_tool.opened_preset
     }
-    button.style.width = 150
+    button.style.width = 180
 
     return flow
 end
@@ -129,7 +129,7 @@ function lib.preset_list(frame)
     }
 
     list.style.width = 200
-    list.style.maximal_height = 200
+    list.style.maximal_height = 400
 
     return list
 end
@@ -165,6 +165,7 @@ function lib.populate_preset_list(list)
             elem.preset_selection.state = true
         end
         if i == railbow_tool.opened_preset then
+            elem.preset_button.toggled = true
         end
     end
 end

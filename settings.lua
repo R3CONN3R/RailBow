@@ -20,5 +20,14 @@ data:extend({
     order = "b",
     localised_name = {"settings-name.railbow-tile-calculations-per-tick"},
     localised_description = {"settings-description.railbow-tile-calculations-per-tick"}
+    },
+    {
+        type = "bool-setting",
+        name = "railbow-instant-build",
+        setting_type = "runtime-per-user",
+        default_value = true,
+        order = "c",
+        localised_name = {"settings-name.railbow-instant-build"},
+        localised_description = {"settings-description.railbow-instant-build"}
     }
 })
