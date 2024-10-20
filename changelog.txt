@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.4
-Date: 18.10.2024
+Date: 20.10.2024
   Changes:
     - Staggered building.
     - Copy and paste tiles with shift + right click and shift + left click.
