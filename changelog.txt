@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.2.0
+Date: 26.10.2024
+  Changes:
+    - Updated for Factorio 2.0
+    - Dropped support for legacy rails.
+    - Added support for new rails.
+    - Increased the range from +/- 8 to +/- 10 tiles.
+---------------------------------------------------------------------------------------------------
 Version: 1.1.4
 Date: 20.10.2024
   Changes:
