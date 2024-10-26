@@ -34,34 +34,34 @@ local function do_mask_accumulation(railbow_calculation)
         if offset then
             pos_i = math2d.position.subtract(entity_pos_to_built_pos(entity), p0)
         end
-        local mask = masks[entity.name][entity.direction]
-        for d, elem_i in pairs(mask) do
-
-            local d_map = drive_directions.mapper[mask_calculation.drive_directions[entity.unit_number]]
-            local d_ = d_map(d)
-            if d_ < tile_min or d_ > tile_max then
-                goto continue
+        local mask = masks[entity.name]
+        if mask then
+            mask = mask[entity.direction]
+            for d, elem_i in pairs(mask) do
+                local d_map = drive_directions.mapper[mask_calculation.drive_directions[entity.unit_number]]
+                local d_ = d_map(d)
+                if d_ >= tile_min or d_ <= tile_max then
+                    local w = weight(d)
+                    for _, elem_j in pairs(elem_i) do
+                        local pos_j = math2d.position.add(pos_i, elem_j.pos)
+                        if not tile_map[pos_j.x] then
+                            tile_map[pos_j.x] = {}
+                        end
+                        if not tile_map[pos_j.x][pos_j.y] then
+                            tile_map[pos_j.x][pos_j.y] = {}
+                            table.insert(tile_array, {pos_j.x, pos_j.y})
+                        end
+                        if not tile_map[pos_j.x][pos_j.y][d_] then
+                            tile_map[pos_j.x][pos_j.y][d_] = 0.0
+                        end
+                        if elem_j.o then
+                            tile_map[pos_j.x][pos_j.y][d_] = tile_map[pos_j.x][pos_j.y][d_] + w/2
+                        else
+                            tile_map[pos_j.x][pos_j.y][d_] = tile_map[pos_j.x][pos_j.y][d_] + w
+                        end
+                    end
+                end
             end
-            local w = weight(d)
-            for _, elem_j in pairs(elem_i) do
-                local pos_j = math2d.position.add(pos_i, elem_j.pos)
-                if not tile_map[pos_j.x] then
-                    tile_map[pos_j.x] = {}
-                end
-                if not tile_map[pos_j.x][pos_j.y] then
-                    tile_map[pos_j.x][pos_j.y] = {}
-                    table.insert(tile_array, {pos_j.x, pos_j.y})
-                end
-                if not tile_map[pos_j.x][pos_j.y][d_] then
-                    tile_map[pos_j.x][pos_j.y][d_] = 0.0
-                end
-                if elem_j.o then
-                    tile_map[pos_j.x][pos_j.y][d_] = tile_map[pos_j.x][pos_j.y][d_] + w/2
-                else
-                    tile_map[pos_j.x][pos_j.y][d_] = tile_map[pos_j.x][pos_j.y][d_] + w
-                end
-            end
-            ::continue::
         end
     end
     iteration_state.last_step = i1

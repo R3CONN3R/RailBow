@@ -2,12 +2,13 @@ local drive_directions = require("scripts.direction")
 local math2d = require("__core__.lualib.math2d")
 
 local rail_list = {"curved-rail-a", "curved-rail-b", "straight-rail", "half-diagonal-rail"}
-
 if script.active_mods["elevated-rails"] then
-    table.insert(rail_list, "rail-ramp")
+    local elevated_rail_list = {"rail-ramp"}
     for _, rail in pairs(rail_list) do
-        table.insert(rail_list, "elevated-"..rail)
+        table.insert(elevated_rail_list, rail)
+        table.insert(elevated_rail_list, "elevated-"..rail)
     end
+    rail_list = elevated_rail_list
 end
 local signal_list = {"rail-signal", "rail-chain-signal"}
 
@@ -56,8 +57,8 @@ local function set_up_calculation(player, e)
 
     --- @type table<integer, string>
     local tiles_copy = {}
-    local tiles_min = 8
-    local tiles_max = -8
+    local tiles_min = 10
+    local tiles_max = -10
     for i, tile in pairs(tiles) do
         tiles_copy[i] = tile
         if tile ~= nil then
@@ -122,7 +123,7 @@ local function set_up_calculation(player, e)
 end
 
 local function draw_rail_centers(player, e)
-    local signals, rails = seperate_signals_and_rails(e.entities)
+    local _, rails = seperate_signals_and_rails(e.entities)
     for _, rail in pairs(rails) do
         game.print(rail.name.." direction: "..rail.direction.."position: "..rail.position.x..", "..rail.position.y)
         rendering.draw_circle{
@@ -148,8 +149,8 @@ local function on_player_selected_area(e)
     if not player then
         return
     end
-    draw_rail_centers(player, e)
-    -- set_up_calculation(player, e)
+    -- draw_rail_centers(player, e)
+    set_up_calculation(player, e)
 end
 
 local selection = {}

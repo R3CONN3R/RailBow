@@ -18,4 +18,12 @@ local masks = {
     ["half-diagonal-rail"] = half_diagonal_rail,
 }
 
+if script.active_mods["elevated-rails"] then
+    masks["elevated-curved-rail-a"] = masks["curved-rail-a"]
+    masks["elevated-curved-rail-b"] = masks["curved-rail-b"]
+    masks["elevated-straight-rail"] = masks["straight-rail"]
+    masks["elevated-half-diagonal-rail"] = masks["half-diagonal-rail"]
+    masks["rail-ramp"] = require("scripts.masks.rail_ramp")
+end
+
 return masks
