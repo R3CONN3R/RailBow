@@ -2,6 +2,13 @@ local drive_directions = require("scripts.direction")
 local math2d = require("__core__.lualib.math2d")
 
 local rail_list = {"curved-rail-a", "curved-rail-b", "straight-rail", "half-diagonal-rail"}
+
+if script.active_mods["elevated-rails"] then
+    table.insert(rail_list, "rail-ramp")
+    for _, rail in pairs(rail_list) do
+        table.insert(rail_list, "elevated-"..rail)
+    end
+end
 local signal_list = {"rail-signal", "rail-chain-signal"}
 
 local function contains(table, element)
@@ -19,9 +26,9 @@ local function seperate_signals_and_rails(entities)
     local signals = {}
     local rails = {}
     for _, entity in pairs(entities) do
-        if table.contains(rail_list, entity.name) then
+        if table.contains(rail_list, entity.type) then
             table.insert(rails, entity)
-        elseif table.contains(signal_list, entity.name) then
+        elseif table.contains(signal_list, entity.type) then
             table.insert(signals, entity)
         end
     end
@@ -141,8 +148,8 @@ local function on_player_selected_area(e)
     if not player then
         return
     end
-    -- draw_rail_centers(player, e)
-    set_up_calculation(player, e)
+    draw_rail_centers(player, e)
+    -- set_up_calculation(player, e)
 end
 
 local selection = {}

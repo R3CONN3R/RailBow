@@ -3,9 +3,19 @@ local filter = {
     "curved-rail-b",
     "straight-rail",
     "half-diagonal-rail",
-    "rail-signal",
-    "rail-chain-signal",
 }
+
+if mods["elevated-rails"] then
+  local elevated_rails = {"rail-ramp"}
+  for _, rail in pairs(filter) do
+    table.insert(elevated_rails, rail)
+    table.insert(elevated_rails, "elevated-" .. rail)
+  end
+  filter = elevated_rails
+end
+
+table.insert(filter, "rail-signal")
+table.insert(filter, "rail-chain-signal")
 
 data:extend({
   {
