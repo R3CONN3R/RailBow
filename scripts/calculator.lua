@@ -1,5 +1,5 @@
 local math2d = require("__core__.lualib.math2d")
-local masks = require("scripts.rail_masks")
+local masks = require("scripts.masks.masks")
 local drive_directions = require("scripts.direction")
 
 local function entity_pos_to_built_pos(entity)
@@ -7,7 +7,7 @@ local function entity_pos_to_built_pos(entity)
 end
 
 local function weight(d)
-    return 1/(math.abs(d)^2+1)
+    return 1/(math.abs(d)^6)
 end
 
 ---@param railbow_calculation RailBowCalculation
@@ -186,27 +186,27 @@ local function do_tile_picking(railbow_calculation)
 end
 
 local function work()
-    if not global.railbow_calculation_queue then
+    if not storage.railbow_calculation_queue then
         return
     end
-    local railbow_calculation = global.railbow_calculation_queue[1]
+    local railbow_calculation = storage.railbow_calculation_queue[1]
     if not railbow_calculation then
         return
     end
 
     if not railbow_calculation.mask_calculation.iteration_state.calculation_complete then
-        global.railbow_calculation_queue[1] = do_mask_accumulation(railbow_calculation)
+        storage.railbow_calculation_queue[1] = do_mask_accumulation(railbow_calculation)
         return
     end
 
     if railbow_calculation.mask_calculation.iteration_state.calculation_complete then
         if not railbow_calculation.tile_calculation.iteration_state.calculation_complete then
-            global.railbow_calculation_queue[1] = do_tile_picking(railbow_calculation)
+            storage.railbow_calculation_queue[1] = do_tile_picking(railbow_calculation)
             return
         end
     end
 
-    table.remove(global.railbow_calculation_queue, 1)
+    table.remove(storage.railbow_calculation_queue, 1)
 end
 
 local calculator = {}

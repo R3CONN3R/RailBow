@@ -41,7 +41,7 @@ local function initialize_global(player)
         return
     end
 
-    if not global.railbow_tools[player.index] then
+    if not storage.railbow_tools[player.index] then
         local init_tiles = {}
         for i = -8, 8 do
             if i ~= 0 then
@@ -56,7 +56,7 @@ local function initialize_global(player)
             mode = "vote"
         }
 
-        global.railbow_tools[player.index] = {
+        storage.railbow_tools[player.index] = {
             presets = {init_config},
             selected_preset = 1,
             opened_preset = nil,
@@ -88,19 +88,19 @@ local function on_player_created(e)
 end
 
 local function on_player_removed(e)
-    global.railbow_tools[e.player_index] = nil
-    for i, data in pairs(global.railbow_calculation_queue) do
+    storage.railbow_tools[e.player_index] = nil
+    for i, data in pairs(storage.railbow_calculation_queue) do
         if data.player_index == e.player_index then
-            table.remove(global.railbow_calculation_queue, i)
+            table.remove(storage.railbow_calculation_queue, i)
         end
     end
 end
 
 local function on_init()
     --- @type table<integer, RailBowSelectionTool>
-    global.railbow_tools = {}
+    storage.railbow_tools = {}
     --- @type RailBowCalculation[]
-    global.railbow_calculation_queue = {}
+    storage.railbow_calculation_queue = {}
     
     for _, player in pairs(game.players) do
         initialize_global(player)

@@ -81,14 +81,14 @@ local segment_states = {
 }
 
 local function is_rail_segment_exit_blocked(segment)
-    local ent_end = segment.rail.get_rail_segment_entity(segment.direction, false)
-    local ent_end_opp = segment.rail.get_rail_segment_entity(segment.direction, true)
+    local ent_end = segment.rail.get_rail_segment_signal(segment.direction, false)
+    local ent_end_opp = segment.rail.get_rail_segment_signal(segment.direction, true)
     return is_signal(ent_end_opp) and not is_signal(ent_end)
 end
 
 local function is_rail_segment_entry_blocked(segment)
-    local ent_start = segment.rail.get_rail_segment_entity(1 - segment.direction, true)
-    local ent_start_opp = segment.rail.get_rail_segment_entity(1 - segment.direction, false)
+    local ent_start = segment.rail.get_rail_segment_signal(1 - segment.direction, true)
+    local ent_start_opp = segment.rail.get_rail_segment_signal(1 - segment.direction, false)
     return is_signal(ent_start_opp) and not is_signal(ent_start)
 end
 

@@ -5,7 +5,7 @@ local lib = {}
 
 --- @param player LuaPlayer
 function lib.create_railbow_window(player)
-    local railbow_tool = global.railbow_tools[player.index]
+    local railbow_tool = storage.railbow_tools[player.index]
 
     local frame = player.gui.screen.add{
         type = "frame",

@@ -33,7 +33,7 @@ function lib.main_title_bar(frame)
     title_bar.add{
         type = "sprite-button",
         name = "close_button",
-        sprite = "utility/close_white",
+        sprite = "utility/close",
         style = "frame_action_button",
         mouse_button_filter = {"left"}
     }
@@ -89,7 +89,7 @@ function lib.preset_selector(list, index)
             direction = "horizontal"
         }
     end
-    local railbow_tool = util.table.deepcopy(global.railbow_tools[list.player_index])
+    local railbow_tool = util.table.deepcopy(storage.railbow_tools[list.player_index])
     local preset = railbow_tool.presets[index]
 
     flow.style.width = 185
@@ -151,7 +151,7 @@ end
 
 --- @param list LuaGuiElement
 function lib.populate_preset_list(list)
-    local railbow_tool = util.table.deepcopy(global.railbow_tools[list.player_index])
+    local railbow_tool = util.table.deepcopy(storage.railbow_tools[list.player_index])
 
     if list.children then
         for _, child in pairs(list.children) do
@@ -173,7 +173,7 @@ end
 --- @param frame LuaGuiElement
 --- @return LuaGuiElement
 function lib.elem_choose_header(frame)
-    local railbow_tool = util.table.deepcopy(global.railbow_tools[frame.player_index])
+    local railbow_tool = util.table.deepcopy(storage.railbow_tools[frame.player_index])
     if frame.elem_choose_header then
         frame.elem_choose_header.destroy()
     end
@@ -190,7 +190,7 @@ function lib.elem_choose_header(frame)
         text = railbow_tool.presets[railbow_tool.opened_preset].name,
     }
 
-    preset_name.style.width = 200
+    preset_name.style.width = 250
 
     header.add{
         type = "sprite-button",
@@ -207,15 +207,16 @@ end
 --- @param frame LuaGuiElement
 --- @return LuaGuiElement
 function lib.choose_elem_table(frame)
-    local railbow_tool = util.table.deepcopy(global.railbow_tools[frame.player_index])
+    local railbow_tool = util.table.deepcopy(storage.railbow_tools[frame.player_index])
     if frame.choose_elem_table then
         frame.choose_elem_table.destroy()
     end
     local table = frame.add{
         type = "table",
         name = "table",
-        column_count = 17
+        column_count = 21
     }
+
 
     local selected_preset = railbow_tool.opened_preset
     if not railbow_tool.presets[selected_preset].tiles then
@@ -223,7 +224,7 @@ function lib.choose_elem_table(frame)
     end
     local selected_tiles = railbow_tool.presets[selected_preset].tiles
 
-    for i = -8, 8 do
+    for i = -10, 10 do
         if i ~= 0 then
             table.add{
                 type = "choose-elem-button",

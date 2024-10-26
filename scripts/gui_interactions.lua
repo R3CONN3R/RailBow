@@ -6,7 +6,7 @@ local lib = {}
 ---@param tiles table<integer, string>|nil
 ---@param preset_name string|nil
 function lib.add_preset(player, tiles, preset_name)
-    local railbow_tool = global.railbow_tools[player.index]
+    local railbow_tool = storage.railbow_tools[player.index]
     local presets = railbow_tool.presets
     local n_presets = #presets
 
@@ -23,7 +23,7 @@ function lib.add_preset(player, tiles, preset_name)
         tiles = tiles,
         mode = "vote"
     }
-    table.insert(global.railbow_tools[player.index].presets, new_preset)
+    table.insert(storage.railbow_tools[player.index].presets, new_preset)
     
     local list = player.gui.screen.railbow_window.configuration_flow.selection_frame.preset_list
     gui_elements.preset_selector(list, n_presets + 1)
@@ -41,7 +41,7 @@ end
 
 --- @param player LuaPlayer
 function lib.close_preset(player)
-    local railbow_tool = global.railbow_tools[player.index]
+    local railbow_tool = storage.railbow_tools[player.index]
     local conf = player.gui.screen.railbow_window.configuration_flow
     if conf.tile_selection_frame then
         conf.tile_selection_frame.destroy()
@@ -53,7 +53,7 @@ end
 --- @param player LuaPlayer
 --- @param index integer
 function lib.change_selected_preset(player, index)
-    local railbow_tool = global.railbow_tools[player.index]
+    local railbow_tool = storage.railbow_tools[player.index]
     local gui_list = player.gui.screen.railbow_window.configuration_flow.selection_frame.preset_list
     gui_list["preset_flow_" .. railbow_tool.selected_preset].preset_selection.state = false
     gui_list["preset_flow_" .. index].preset_selection.state = true
@@ -64,7 +64,7 @@ end
 --- @param index integer
 --- @param toggled boolean
 function lib.change_opened_preset(player, index, toggled)
-    local railbow_tool = global.railbow_tools[player.index]
+    local railbow_tool = storage.railbow_tools[player.index]
 
     local conflow = player.gui.screen.railbow_window.configuration_flow
 
@@ -104,7 +104,7 @@ function lib.change_opened_preset(player, index, toggled)
 end
 
 function lib.delete_preset(player)
-    local railbow_tool = global.railbow_tools[player.index]
+    local railbow_tool = storage.railbow_tools[player.index]
     local opened_preset = railbow_tool.opened_preset
     local selected_preset = railbow_tool.selected_preset
     local presets = railbow_tool.presets
@@ -131,7 +131,7 @@ function lib.delete_preset(player)
 end
 
 function lib.copy_preset(player)
-    local railbow_tool = global.railbow_tools[player.index]
+    local railbow_tool = storage.railbow_tools[player.index]
     local opened_preset = railbow_tool.opened_preset
     if not opened_preset then return end
     local presets = railbow_tool.presets
@@ -157,7 +157,7 @@ function lib.tile_selector_clicked(event)
     local index = tonumber(element.name:match("([+-]?%d+)$"))
     if not index then return end
 
-    local railbow_tool = global.railbow_tools[player_index]
+    local railbow_tool = storage.railbow_tools[player_index]
     local window = player.gui.screen.railbow_window
     local frame = window.configuration_flow.tile_selection_frame
     local selector = frame.table["tile_selector_" .. index]

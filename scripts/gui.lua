@@ -62,8 +62,8 @@ local function selector_changed(event)
         local index = tonumber(element.name:match("([+-]?%d+)$"))
         if index then
             if element.elem_value then
-                local opened_preset = global.railbow_tools[player_index].opened_preset
-                global.railbow_tools[player_index].presets[opened_preset].tiles[index] = element.elem_value
+                local opened_preset = storage.railbow_tools[player_index].opened_preset
+                storage.railbow_tools[player_index].presets[opened_preset].tiles[index] = element.elem_value
             end
         end
     end
@@ -75,7 +75,7 @@ local function text_changed(event)
     local player = game.get_player(player_index)
     if not player then return end
     if element.name == "preset_name" then
-        local railbow_tool = global.railbow_tools[player_index]
+        local railbow_tool = storage.railbow_tools[player_index]
         local opened_preset = railbow_tool.opened_preset
         railbow_tool.presets[opened_preset].name = element.text
         player.gui.screen.railbow_window.configuration_flow.selection_frame.preset_list["preset_flow_" .. opened_preset].preset_button.caption = element.text

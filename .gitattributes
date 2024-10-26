@@ -4,3 +4,4 @@
 .gitmodules export-ignore
 .git export-ignore
 demo export-ignore
+python_scripts export-ignore

@@ -1,6 +1,8 @@
 local filter = {
-    "curved-rail",
+    "curved-rail-a",
+    "curved-rail-b",
     "straight-rail",
+    "half-diagonal-rail",
     "rail-signal",
     "rail-chain-signal",
 }
@@ -10,18 +12,23 @@ data:extend({
     type = "selection-tool",
     name = "railbow-selection-tool",
     icon = "__RailBow__/graphics/railbow-selection-tool.png",
-    icon_size = 32,
-    selection_color = {r = 1, g = 0, b = 0},
-    selection_mode = {"buildable-type", "same-force"},
-    selection_cursor_box_type = "entity",
-    entity_filter_mode = "whitelist",
-    entity_filters = filter,
+    icon_size = 64,
+    select = {
+      border_color = { r = 1, g = 0.5, b = 0 },
+      cursor_box_type = "train-visualization",
+      mode = "any-entity",
+      entity_filters = filter
+    },
 
-    alt_selection_color = {r = 0, g = 1, b = 0},
-    alt_selection_mode = {"nothing"},
-    alt_selection_cursor_box_type = "entity",
+    alt_select = {
+      border_color = { r = 1, g = 0.5, b = 0 },
+      cursor_box_type = "train-visualization",
+      mode = "any-entity",
+      entity_filters = filter
+    },
+    
 
     stack_size = 1,
-    flags = {"hidden", "only-in-cursor", "not-stackable"},
+    flags = {"hide-from-bonus-gui", "only-in-cursor", "not-stackable"},
   }
 })
