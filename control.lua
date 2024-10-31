@@ -1,4 +1,5 @@
 local handler = require("__core__.lualib.event_handler")
+local mod_gui = require("mod-gui")
 
 --- @class IterationState
 --- @field n_steps integer
@@ -67,16 +68,14 @@ end
 
 local function create_button(player)
     if not player then return end
-    if not player.gui.top.railbow_button then
-        player.gui.top.add{
-            type = "frame",
-            name = "railbow_frame",
-        }
-        player.gui.top.railbow_frame.add{
+    local button_flow = mod_gui.get_button_flow(player)
+    if not button_flow.railbow_button then
+        button_flow.add{
             type = "sprite-button",
             name = "railbow_button",
             sprite = "item/railbow-selection-tool",
-            tooltip = {"tooltips.railbow-open-gui"}
+            tooltip = {"tooltips.railbow-open-gui"}, 
+            style=mod_gui.button_style
         }
     end
 end
@@ -118,7 +117,7 @@ control.events = {
 }
 
 handler.add_libraries({
-    control, 
+    control,
     require("scripts.shortcut"),
     require("scripts.selection"),
     require("scripts.gui"),
