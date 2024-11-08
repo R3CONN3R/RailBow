@@ -122,22 +122,6 @@ local function set_up_calculation(player, e)
     table.insert(storage.railbow_calculation_queue, railbow_calculation)
 end
 
-local function draw_rail_centers(player, e)
-    local _, rails = seperate_signals_and_rails(e.entities)
-    for _, rail in pairs(rails) do
-        game.print(rail.name.." direction: "..rail.direction.."position: "..rail.position.x..", "..rail.position.y)
-        rendering.draw_circle{
-            color = {r = 1, g = 0, b = 0},
-            radius = 0.1,
-            width = 1,
-            filled = true,
-            target = rail,
-            surface = player.surface,
-            time_to_live = 60*5
-        }
-    end
-end
-
 local function on_player_selected_area(e)
     if e.item ~= "railbow-selection-tool" then
         return
@@ -149,7 +133,6 @@ local function on_player_selected_area(e)
     if not player then
         return
     end
-    -- draw_rail_centers(player, e)
     set_up_calculation(player, e)
 end
 

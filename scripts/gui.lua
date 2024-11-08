@@ -101,7 +101,7 @@ gui.events = {
     [defines.events.on_gui_click] = gui_click,
     [defines.events.on_gui_elem_changed] = selector_changed,
     [defines.events.on_gui_closed] = gui_closed,
-    [defines.events.on_gui_text_changed] = text_changed,
+    [defines.events.on_gui_confirmed] = text_changed,
     [defines.events.on_gui_checked_state_changed] = checked_state_changed,
 }
 

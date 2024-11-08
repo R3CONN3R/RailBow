@@ -1,21 +1,26 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.2.4
+Date: 2024-11-08
+  Changes:
+    - Preset name change requires confirmation now.
+---------------------------------------------------------------------------------------------------
 Version: 1.2.3
-Date: 31.10.2024
+Date: 2024-10-31
   Changes:
     - Changend thumbnail.
 ---------------------------------------------------------------------------------------------------
 Version: 1.2.2
-Date: 31.10.2024
+Date: 2024-10-31
   Changes:
     - Moved the configuration button to the mod-gui flow.
 ---------------------------------------------------------------------------------------------------
 Version: 1.2.1
-Date: 26.10.2024
+Date: 2024-10-26
   Bugfixes:
     - Added support for elevated rails.
 ---------------------------------------------------------------------------------------------------
 Version: 1.2.0
-Date: 26.10.2024
+Date: 2024-10-26
   Changes:
     - Updated for Factorio 2.0
     - Dropped support for legacy rails.
@@ -23,23 +28,23 @@ Date: 26.10.2024
     - Increased the range from +/- 8 to +/- 10 tiles.
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.4
-Date: 20.10.2024
+Date: 2024-10-20
   Changes:
     - Staggered building.
     - Copy and paste tiles with shift + right click and shift + left click.
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.3
-Date: 18.10.2024
+Date: 2024-10-18
   Changes:
     - Improved GUI
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.2
-Date: 13.10.2024
+Date: 2024-10-13
   Bugfixes:
     - Fixed a bug where a tile preset might not exist and cause an error.
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.1
-Date: 10.10.2024
+Date: 2024-10-10
   Changes:
     - The default tile preset is now empty for compatability reasons.
     - Removing a player from the game will also remove their queued calculations.
@@ -47,7 +52,7 @@ Date: 10.10.2024
     - Fixed misconfigured game states.
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.0
-Date: 06.10.2024
+Date: 2024-10-06
   Changes:
     - Upgraded GUI
   Features:
@@ -56,7 +61,7 @@ Date: 06.10.2024
     - Copy tile presets.
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.3
-Date: 05.10.2024
+Date: 2024-10-05
   Changes:
     - Improved performance.
     - RailBow selection tool can now be used while a calculation is ongoing.
@@ -66,16 +71,16 @@ Date: 05.10.2024
     - This update will discard all ongoing calculations.
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.2
-Date: 01.10.2024
+Date: 2024-10-01
   Changes:
     - Removed dependency on stdlib.
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.1
-Date: 29.09.2024
+Date: 2024-09-29
   Bugfixes:
     - Fixed a bug which would've affected multiplayer.
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.0
-Date: 27.09.2024
+Date: 2024-09-27
   Info:
     - Initial release

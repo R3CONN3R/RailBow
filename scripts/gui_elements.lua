@@ -185,7 +185,7 @@ function lib.elem_choose_header(frame)
     }
 
     local preset_name = header.add{
-        type = "text-box",
+        type = "textfield",
         name = "preset_name",
         text = railbow_tool.presets[railbow_tool.opened_preset].name,
     }
