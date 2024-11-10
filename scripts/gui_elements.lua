@@ -3,8 +3,9 @@ local util = require("__core__/lualib/util")
 local lib = {}
 
 --- @param frame LuaGuiElement
+--- @param caption string
 --- @return LuaGuiElement
-function lib.main_title_bar(frame)
+function lib.main_title_bar(frame, caption)
     if frame.title_bar then
         frame.title_bar.destroy()
     end
@@ -17,7 +18,7 @@ function lib.main_title_bar(frame)
     title_bar.add{
         type = "label",
         style = "frame_title",
-        caption = {"titles.railbow-gui-title"},
+        caption = {caption},
         ignored_by_interaction = true
     }
 
@@ -61,12 +62,38 @@ function lib.preset_list_header(frame)
         tooltip = {"tooltips.railbow-add-preset"}
     }
 
+    local player = game.get_player(frame.player_index)
+    if not player then return header end
+    local railbow_tool = util.table.deepcopy(storage.railbow_tools[player.index])
+    local enabled = false
+    if railbow_tool.opened_preset then
+        enabled = true
+    end
+
     header.add{
         type = "sprite-button",
         name = "copy_preset_button",
         style = "tool_button",
         sprite = "utility/copy",
-        tooltip = {"tooltips.railbow-copy-preset"}
+        tooltip = {"tooltips.railbow-copy-preset"},
+        enabled = enabled
+    }
+
+    header.add{
+        type = "sprite-button",
+        name = "export_preset_button",
+        style = "tool_button",
+        sprite = "utility/export",
+        tooltip = {"tooltips.railbow-export-preset"},
+        enabled = enabled
+    }
+
+    header.add{
+        type = "sprite-button",
+        name = "import_preset_button",
+        sprite = "utility/import",
+        tooltip = {"tooltips.railbow-import-preset"},
+        style = "tool_button",
     }
 
     return header
@@ -207,7 +234,7 @@ end
 --- @param frame LuaGuiElement
 --- @return LuaGuiElement
 function lib.choose_elem_table(frame)
-    local railbow_tool = util.table.deepcopy(storage.railbow_tools[frame.player_index])
+    local railbow_tool = storage.railbow_tools[frame.player_index]
     if frame.choose_elem_table then
         frame.choose_elem_table.destroy()
     end
@@ -226,14 +253,28 @@ function lib.choose_elem_table(frame)
 
     for i = -10, 10 do
         if i ~= 0 then
-            table.add{
-                type = "choose-elem-button",
-                name = "tile_selector_" .. i,
-                elem_type = "tile",
-                tile = selected_tiles[i],
-                elem_filters = {{filter = "blueprintable"}},
-            }
-        
+            local status, _ = pcall(function()
+                table.add{
+                    type = "choose-elem-button",
+                    name = "tile_selector_" .. i,
+                    elem_type = "tile",
+                    tile = selected_tiles[i],
+                    elem_filters = {{filter = "blueprintable"}},
+                }
+            end)
+            if not status then
+                local player = game.get_player(frame.player_index)
+                if not player then return table end
+                player.print("[color=red]Error: Invalid tile in preset, defaulting to nil.[/color]")
+                table.add{
+                    type = "choose-elem-button",
+                    name = "tile_selector_" .. i,
+                    elem_type = "tile",
+                    tile = nil,
+                    elem_filters = {{filter = "blueprintable"}},
+                }
+                selected_tiles[i] = nil
+            end
         else
             table.add{
                 type = "sprite-button",
@@ -260,6 +301,55 @@ function lib.tile_selection_frame(frame)
     }
 
     return tile_selection_frame
+end
+
+function lib.export_string_input(frame)
+    if frame.export_string_input then
+        frame.export_string_input.destroy()
+    end
+    local player = game.get_player(frame.player_index)
+    if not player then return end
+    local railbow_tool = util.table.deepcopy(storage.railbow_tools[player.index])
+    local preset = railbow_tool.presets[railbow_tool.opened_preset]
+    local json = helpers.table_to_json(preset)
+    local exchange_string = helpers.encode_string(json)
+
+    local input = frame.add{
+        type = "text-box",
+        name = "export_string_input",
+        text = exchange_string,
+    }
+
+    input.style.width = 400
+    input.style.height = 200
+    input.word_wrap = true
+    input.read_only = true
+end
+
+function lib.import_string_input(frame)
+    if frame.import_string_input then
+        frame.import_string_input.destroy()
+    end
+    local input = frame.add{
+        type = "text-box",
+        name = "import_string_input",
+        text = "",
+    }
+    input.style.width = 400
+    input.style.height = 200
+    input.word_wrap = true
+end
+
+function lib.import_string_button(frame)
+    if frame.import_string_button then
+        frame.import_string_button.destroy()
+    end
+    frame.add{
+        type = "button",
+        name = "import_string_button",
+        caption = {"button.railbow-import"},
+        style = "confirm_button"
+    } 
 end
 
 return lib

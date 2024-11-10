@@ -2,15 +2,21 @@ local layout = require("scripts.gui_layout")
 local interactions = require("scripts.gui_interactions")
 local elements = require("scripts.gui_elements")
 
-local function close_gui(player)
+local function close_main_gui(player)
     if player.gui.screen.railbow_window then
         player.gui.screen.railbow_window.destroy()
+    end
+    if player.gui.screen.export_string_window then
+        player.gui.screen.export_string_window.destroy()
+    end
+    if player.gui.screen.import_string_window then
+        player.gui.screen.import_string_window.destroy()
     end
 end
 
 local function open_gui(player)
     if player.gui.screen.railbow_window then
-        close_gui(player)
+        close_main_gui(player)
     else
         layout.create_railbow_window(player)
     end
@@ -26,7 +32,14 @@ local function gui_click(e)
     if element.name == "railbow_button" then
         open_gui(player)
     elseif element.name == "close_button" then
-        close_gui(player)
+        local window = element.parent.parent
+        if window then
+            if window.name == "railbow_window" then
+                close_main_gui(player)
+            else
+                window.destroy()
+            end
+        end
     elseif element.name == "add_preset_button" then
         interactions.add_preset(player)
     elseif element.name == "preset_button" then
@@ -41,9 +54,16 @@ local function gui_click(e)
     elseif element.name:find("tile_selector_") then
         local reset_gui = interactions.tile_selector_clicked(e)
         if reset_gui then
-            close_gui(player)
+            close_main_gui(player)
             open_gui(player)
         end
+    elseif element.name == "export_preset_button" then
+        layout.create_export_string_window(player)
+    elseif element.name == "import_preset_button" then
+        layout.create_import_string_window(player)
+    elseif element.name == "import_string_button" then
+        interactions.import_preset(player)
+        element.parent.parent.destroy()
     end
 end
 
@@ -51,7 +71,7 @@ local function gui_closed(e)
     local player = game.get_player(e.player_index)
     if not player then return end
     if e.element and e.element.name == "railbow_window" then
-        close_gui(player)
+        close_main_gui(player)
     end
 end
 

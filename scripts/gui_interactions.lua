@@ -37,6 +37,12 @@ function lib.open_preset(flow)
     local tile_selection_frame = gui_elements.tile_selection_frame(flow)
     gui_elements.elem_choose_header(tile_selection_frame)
     gui_elements.choose_elem_table(tile_selection_frame)
+
+    local player = game.get_player(flow.player_index)
+    if not player then return end
+    local buttons = player.gui.screen.railbow_window.configuration_flow.selection_frame.header
+    buttons.copy_preset_button.enabled = true
+    buttons.export_preset_button.enabled = true
 end
 
 --- @param player LuaPlayer
@@ -48,6 +54,9 @@ function lib.close_preset(player)
     end
     railbow_tool.opened_preset = nil
 
+    local buttons = conf.selection_frame.header
+    buttons.copy_preset_button.enabled = false
+    buttons.export_preset_button.enabled = false
 end
 
 --- @param player LuaPlayer
@@ -95,8 +104,15 @@ function lib.change_opened_preset(player, index, toggled)
     for i, element in pairs(frame.table.children) do
         if string.find(element.name, "tile_selector_") then
             local index_ = tonumber(element.name:match("([+-]?%d+)$"))
-            if index then
-                element.elem_value = opened_tiles[index_]
+            if index_ then
+                local status, _ = pcall(function()
+                    element.elem_value = opened_tiles[index_]
+                end)
+                if not status then
+                    player.print("[color=red]Error: Invalid tile in preset, defaulting to nil.[/color]")
+                    element.elem_value = nil
+                    opened_tiles[index_] = nil
+                end
             end
         end
     end
@@ -179,6 +195,33 @@ function lib.tile_selector_clicked(event)
         end
     end
     return false
+end
+
+--- @param player LuaPlayer
+function lib.import_preset(player)
+    local import_string = player.gui.screen.import_string_window.import_string_flow.import_string_input.text
+    local json = helpers.decode_string(import_string)
+    if not json then
+        player.print("[color=red]Error: Invalid import string, not a json.[/color]")
+        return
+    end
+    local preset = helpers.json_to_table(json)
+    if not preset then
+        player.print("[color=red]Error: Invalid import string, not a table.[/color]")
+        return
+    end
+    if not preset.name or not preset.tiles then
+        player.print("[color=red]Error: Invalid import string, missing fields.[/color]")
+        return
+    end
+    local tiles = {}
+    for i, tile in pairs(preset.tiles) do
+        j = tonumber(i)
+        if j then
+            tiles[j] ="invalid" --- tile
+        end
+    end
+    lib.add_preset(player, tiles, preset.name)
 end
 
 return lib
