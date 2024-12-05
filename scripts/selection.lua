@@ -1,14 +1,33 @@
 local drive_directions = require("scripts.direction")
 local math2d = require("__core__.lualib.math2d")
+																						   
+local rail_list = {
+    "curved-rail-a",
+    "curved-rail-b",
+    "straight-rail",
+    "half-diagonal-rail",
+}
+local static base_rail_list = {
+    "curved-rail-a",
+    "curved-rail-b",
+    "straight-rail",
+    "half-diagonal-rail",
+}
 
-local rail_list = {"curved-rail-a", "curved-rail-b", "straight-rail", "half-diagonal-rail"}
 if script.active_mods["elevated-rails"] then
-    local elevated_rail_list = {"rail-ramp"}
-    for _, rail in pairs(rail_list) do
-        table.insert(elevated_rail_list, rail)
-        table.insert(elevated_rail_list, "elevated-"..rail)
+	table.insert(rail_list, "rail-ramp")
+	for _, rail in pairs(base_rail_list) do
+        table.insert(rail_list, "elevated-"..rail)
+    end  
+	log("elevated rails found and added")
+end
+
+if script.active_mods["naked-rails-f2"] then
+    for _, rail in pairs(base_rail_list) do
+        table.insert(rail_list, "naked-"..rail)     
+        table.insert(rail_list, "sleepy-"..rail)
     end
-    rail_list = elevated_rail_list
+	log("naked rails found and added")
 end
 local signal_list = {"rail-signal", "rail-chain-signal"}
 
