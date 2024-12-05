@@ -37,7 +37,9 @@ local function seperate_signals_and_rails(entities)
 end
 
 local function entity_pos_to_built_pos(entity)
-    return math2d.position.add(entity.position, {0.5, 0.5})
+	if entity ~= nil then                    --prevent crash when only selecting rail signal
+		return math2d.position.add(entity.position, {0.5, 0.5})
+	end
 end
 
 local function set_up_calculation(player, e)
