@@ -1,6 +1,5 @@
 local drive_directions = require("scripts.direction")
 local math2d = require("__core__.lualib.math2d")
-																						   
 local rail_list = {
     "curved-rail-a",
     "curved-rail-b",
@@ -63,7 +62,8 @@ end
 
 local function set_up_calculation(player, e)
     local selection_tool = storage.railbow_tools[player.index]
-    local tiles = selection_tool.presets[selection_tool.selected_preset].tiles
+    local selected_preset = selection_tool.presets[selection_tool.selected_preset]
+    local tiles = selected_preset.tiles
 
     local has_tiles = false
     for _, tile in pairs(tiles) do
@@ -94,6 +94,10 @@ local function set_up_calculation(player, e)
 
     local signals, rails = seperate_signals_and_rails(e.entities)
 
+    if #rails <= 0 then -- no need to go any further with no rails
+        return
+    end
+
     --- @type MaskCalculation
     local mask_calculation = {
         tiles = tiles_copy,
@@ -122,6 +126,31 @@ local function set_up_calculation(player, e)
         end
     end
 
+    local build_mode_def
+    local entity_remove_filter = {}
+
+    if selected_preset.build_mode == nil or selected_preset.build_mode == 0 then
+        selected_preset.build_mode = 1
+    end
+
+    if selected_preset.build_mode == 1 then
+        build_mode_def = defines.build_mode.normal
+    elseif selected_preset.build_mode == 2 then
+        build_mode_def = defines.build_mode.forced
+    elseif selected_preset.build_mode == 3 then
+        build_mode_def = defines.build_mode.superforced
+    else
+        build_mode_def = defines.build_mode.normal
+    end
+
+    if selected_preset.remove_trees then
+        table.insert(entity_remove_filter, "tree")
+        table.insert(entity_remove_filter, "simple-entity")
+    end
+    if selected_preset.remove_cliffs then
+        table.insert(entity_remove_filter, "cliff")
+    end
+
     --- @type TileCalculation
     local tile_calculation = {
         instant_build = instant_build,
@@ -129,7 +158,9 @@ local function set_up_calculation(player, e)
             n_steps = 0,
             last_step = 0,
             calculation_complete = false
-        }
+        },
+        entity_remove_filter = entity_remove_filter,
+        build_mode_def = build_mode_def
     }
 
     --- @type RailBowCalculation
@@ -143,18 +174,19 @@ local function set_up_calculation(player, e)
     table.insert(storage.railbow_calculation_queue, railbow_calculation)
 end
 
-local function on_player_selected_area(e)
-    if e.item ~= "railbow-selection-tool" then
+---@param event EventData.on_player_selected_area
+local function on_player_selected_area(event)
+    if event.item ~= "railbow-selection-tool" then
         return
     end
-    if not next(e.entities) then
+    if not next(event.entities) then
         return
     end
-    local player = game.get_player(e.player_index)
+    local player = game.get_player(event.player_index)
     if not player then
         return
     end
-    set_up_calculation(player, e)
+    set_up_calculation(player, event)
 end
 
 local selection = {}

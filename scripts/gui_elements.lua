@@ -1,3 +1,4 @@
+---@diagnostic disable-next-line: different-requires
 local util = require("__core__/lualib/util")
 
 local lib = {}
@@ -91,9 +92,9 @@ function lib.preset_list_header(frame)
     header.add{
         type = "sprite-button",
         name = "import_preset_button",
+        style = "tool_button",
         sprite = "utility/import",
         tooltip = {"tooltips.railbow-import-preset"},
-        style = "tool_button",
     }
 
     return header
@@ -214,7 +215,7 @@ function lib.elem_choose_header(frame)
     local preset_name = header.add{
         type = "textfield",
         name = "preset_name",
-        text = railbow_tool.presets[railbow_tool.opened_preset].name,
+        text = railbow_tool.presets[railbow_tool.opened_preset].name
     }
 
     preset_name.style.width = 250
@@ -225,8 +226,50 @@ function lib.elem_choose_header(frame)
         sprite = "utility/trash",
         tooltip = {"tooltips.railbow-delete-preset"},
         style = "tool_button_red",
-        mouse_button_filter = {"left"},
+        mouse_button_filter = {"left"}
     }
+
+    local remove_trees_checkbox = header.add{
+        type = "checkbox",
+        name = "remove_trees_checkbox",
+        tooltip = {"tooltips.railbow-remove-trees"},
+        caption = {"button.railbow-remove-trees"},
+        state = false,
+        mouse_button_filter = {"left"}
+    }
+    local remove_cliffs_checkbox = header.add{
+        type = "checkbox",
+        name = "remove_cliffs_checkbox",
+        tooltip = {"tooltips.railbow-remove-cliffs"},
+        caption = {"button.railbow-remove-cliffs"},
+        state = false,
+        mouse_button_filter = {"left"}
+    }
+    local build_mode_dropdown = header.add{
+        type = "drop-down",
+        name = "build_mode_dropdown",
+        tooltip = {"tooltips.railbow-build-mode"},
+        caption = {"dropdown.railbow-build-mode"},
+        default_value = "normal",
+        items = {"normal", "forced", "superforced"},
+        mouse_button_filter = {"left"}
+    }
+    -- TODO: shift to the far right
+
+    build_mode_dropdown.style.width = 200
+
+    local build_mode = railbow_tool.presets[railbow_tool.opened_preset].build_mode
+
+    if build_mode == 0 then build_mode = 1 ; railbow_tool.presets[railbow_tool.opened_preset].build_mode = 1 end
+
+    build_mode_dropdown.selected_index = build_mode
+
+    if railbow_tool.presets[railbow_tool.opened_preset].remove_trees then
+        remove_trees_checkbox.state = true
+    end
+    if railbow_tool.presets[railbow_tool.opened_preset].remove_cliffs then
+        remove_cliffs_checkbox.state = true
+    end
 
     return header
 end
@@ -312,6 +355,8 @@ function lib.export_string_input(frame)
     local railbow_tool = util.table.deepcopy(storage.railbow_tools[player.index])
     local preset = railbow_tool.presets[railbow_tool.opened_preset]
     local json = helpers.table_to_json(preset)
+    ---@TODO export or import for tiles borked for some reason
+    --game.print(serpent.block(json))
     local exchange_string = helpers.encode_string(json)
 
     local input = frame.add{

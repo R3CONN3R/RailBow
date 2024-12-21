@@ -29,5 +29,33 @@ data:extend({
         order = "c",
         localised_name = {"settings-name.railbow-instant-build"},
         localised_description = {"settings-description.railbow-instant-build"}
+    },
+    {
+        type = "string-setting",
+        name = "railbow-default-build-mode",
+        setting_type = "runtime-per-user",
+        default_value = "normal",
+        allowed_values = {"normal", "forced", "superforced"},
+        order = "d",
+        localised_name = {"settings-name.railbow-default-build-mode"},
+        localised_description = {"settings-description.railbow-default-build-mode"}
+    },
+    {
+        type = "bool-setting",
+        name = "railbow-default-remove-trees",
+        setting_type = "runtime-per-user",
+        default_value = true,
+        order = "e",
+        localised_name = {"settings-name.railbow-default-remove-trees"},
+        localised_description = {"settings-description.railbow-default-remove-trees"}
+    },
+    {
+        type = "bool-setting",
+        name = "railbow-default-remove-cliffs",
+        setting_type = "runtime-per-user",
+        default_value = false,
+        order = "f",
+        localised_name = {"settings-name.railbow-default-remove-cliffs"},
+        localised_description = {"settings-description.railbow-default-remove-cliffs"}
     }
 })

@@ -19,6 +19,8 @@ local mod_gui = require("mod-gui")
 
 --- @class TileCalculation
 --- @field instant_build boolean
+--- @field entity_remove_filter table<string>
+--- @field build_mode_def defines.build_mode
 --- @field iteration_state IterationState
 
 --- @class RailBowCalculation
@@ -30,6 +32,9 @@ local mod_gui = require("mod-gui")
 --- @class RailBowConfig
 --- @field name string
 --- @field tiles table<integer, string>
+--- @field build_mode int
+--- @field remove_trees boolean
+--- @field remove_cliffs boolean
 
 --- @class RailBowSelectionTool
 --- @field presets RailBowConfig[]
@@ -54,7 +59,10 @@ local function initialize_global(player)
         local init_config = {
             name = "default",
             tiles = init_tiles,
-            mode = "vote"
+            mode = "vote",
+            build_mode = 1,
+            remove_trees = true,
+            remove_cliffs = false
         }
 
         storage.railbow_tools[player.index] = {
@@ -79,17 +87,17 @@ local function create_button(player)
         }
     end
 end
-
-local function on_player_created(e)
-    local player = game.get_player(e.player_index)
+---@param event EventData.on_player_created
+local function on_player_created(event)
+    local player = game.get_player(event.player_index)
     initialize_global(player)
     create_button(player)
 end
-
-local function on_player_removed(e)
-    storage.railbow_tools[e.player_index] = nil
+---@param event EventData.on_player_removed
+local function on_player_removed(event)
+    storage.railbow_tools[event.player_index] = nil
     for i, data in pairs(storage.railbow_calculation_queue) do
-        if data.player_index == e.player_index then
+        if data.player_index == event.player_index then
             table.remove(storage.railbow_calculation_queue, i)
         end
     end

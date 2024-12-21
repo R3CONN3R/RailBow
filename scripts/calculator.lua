@@ -14,10 +14,15 @@ end
 ---@return RailBowCalculation
 local function do_mask_accumulation(railbow_calculation)
     local mask_calculation = railbow_calculation.mask_calculation
-
     local iteration_state = mask_calculation.iteration_state
 
+    if mask_calculation.rails[1] == nil then           -- prevent crash when only selecting rail signal
+        iteration_state.calculation_complete = true
+		return railbow_calculation
+	end
+
     local rail_calculations_per_tick = settings.global["railbow-rail-calculations-per-tick"].value
+
     local i0 = iteration_state.last_step + 1
     local i1 = math.min(iteration_state.last_step + rail_calculations_per_tick, iteration_state.n_steps)
 
@@ -31,9 +36,9 @@ local function do_mask_accumulation(railbow_calculation)
     for i = i0, i1 do
         local entity = mask_calculation.rails[i]
         local pos_i = entity_pos_to_built_pos(entity)
-        if offset then
-            pos_i = math2d.position.subtract(entity_pos_to_built_pos(entity), p0)
-        end
+        -- if offset then
+        --     pos_i = math2d.position.subtract(entity_pos_to_built_pos(entity), p0)
+        -- end
         local mask = masks[entity.name]
         if mask then
             mask = mask[entity.direction]
@@ -146,6 +151,11 @@ local function do_tile_picking(railbow_calculation)
     local i0 = iteration_state.last_step + 1
     local i1 = math.min(iteration_state.last_step + tile_calculations_per_tick, iteration_state.n_steps)
 
+
+    local surface = mask_calculation.rails[1].surface
+    local player = game.players[railbow_calculation.player_index]
+    local force = player.force
+
     for i = i0, i1 do
         local pos = {x = tile_array[i][1], y = tile_array[i][2]}
         local tile_weights = tile_map[pos.x][pos.y]
@@ -155,30 +165,95 @@ local function do_tile_picking(railbow_calculation)
             table.insert(blueprint_tiles, {name = name, position = pos})
         end
     end
-	if railbow_calculation.mask_calculation.rails[1] ~= nil then           -- prevent crash when only selecting rail signal
-		if tile_calculation.instant_build then
-			railbow_calculation.mask_calculation.rails[1].surface.set_tiles(blueprint_tiles)
-		else
-				railbow_calculation.inventory.insert({name = "blueprint", count = 1})
-				local blueprint = railbow_calculation.inventory[1]
-				blueprint.blueprint_absolute_snapping = true
-				blueprint.blueprint_snap_to_grid = {x = 1, y = 1}
-				blueprint.blueprint_position_relative_to_grid = { x = 0, y = 0 }
-				blueprint.set_blueprint_tiles(blueprint_tiles)
 
-					blueprint.build_blueprint{
-							surface = railbow_calculation.mask_calculation.rails[1].surface,
-							force = game.players[railbow_calculation.player_index].force,
-							position = railbow_calculation.mask_calculation.p0,
-							force_build = true,
-							by_player = game.players[railbow_calculation.player_index],
-							create_build_effect_smoke = false,
-					}
-			railbow_calculation.inventory.clear()
-		end
-	else
-		return
-	end
+    -- local player = game.players[railbow_calculation.player_index]
+    -- local force = player.force
+    -- local surface = mask_calculation.rails[1].surface
+    local tile_pos1 = {}
+    local tile_pos2 = {}
+    local pos_rail = mask_calculation.rails[1].position
+    --local offset = not tile_calculation.instant_build
+
+    if #tile_calculation.entity_remove_filter >= 1 then -- only run when there is something in the filter
+        for _, rockandstone in pairs(blueprint_tiles) do
+            -- if not offset then-- add the relative position(offset) from the bp tile to the absolute position of the rail/bp origin
+            --     tile_pos1 = math2d.position.add(pos_rail, rockandstone.position) 
+            -- else-- position is already absolute just need the slight deviation to get the center of the tile
+                tile_pos1 = math2d.position.add(rockandstone.position, {-0.5, -0.5}) 
+            -- end
+            tile_pos1 = math2d.position.add(tile_pos1, {-1, -1})
+            tile_pos2 = math2d.position.add(tile_pos1, {2, 2}) -- make a 2x2 square area to find entities in
+            wald = surface.find_entities_filtered
+                {
+                    area = {tile_pos1, tile_pos2},
+                    type = tile_calculation.entity_remove_filter
+                }
+            for _, eiche in pairs(wald) do
+                if eiche ~= nil then
+                    if eiche.valid then
+                        if    (eiche.type == "simple-entity" and eiche.prototype.count_as_rock_for_filtered_deconstruction)
+                            or eiche.type == "tree"
+                            or eiche.type == "cliff"
+                        then
+                            if not tile_calculation.instant_build then
+                                eiche.order_deconstruction(force, player)
+                            else
+                                eiche.destroy()
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    if tile_calculation.instant_build then
+        surface.set_tiles {
+            tiles = blueprint_tiles,
+            correct_tiles = true,
+            remove_colliding_entities = true,
+            remove_colliding_decoratives = true,
+            raise_event = false,
+            player = player,
+            undo_index = 0
+        }
+    else
+        for _, tile in pairs(blueprint_tiles) do
+            old_tile = surface.get_tile(tile.position.x, tile.position.y)
+            if old_tile ~= nil then
+                if old_tile.name ~= tile.name then
+                    surface.create_entity {
+                        name        = "tile-ghost",
+                        inner_name  = tile.name,
+                        position    = tile.position,
+                        force       = player.force,
+                        player      = player,
+                        raise_built = true
+                    }
+                end
+            end
+        end
+    end
+    -- elseif false then -- overhauled but old blueprint method. but i couldnt find a way to add it to the player.undo_redo_stack
+    --     railbow_calculation.inventory.insert({name = "blueprint", count = 1})
+    --     local blueprint = railbow_calculation.inventory[1]
+    --     blueprint.blueprint_absolute_snapping = true
+    --     blueprint.blueprint_snap_to_grid = {x = 1, y = 1}
+    --     blueprint.blueprint_position_relative_to_grid = { x = 0, y = 0 }
+    --     blueprint.set_blueprint_tiles(blueprint_tiles)
+    --     local ghosts =
+    --         blueprint.build_blueprint{
+    --                 surface = surface,
+    --                 force = force,
+    --                 position = mask_calculation.p0,
+    --                 build_mode = tile_calculation.build_mode_def,
+    --                 by_player = player,
+    --                 create_build_effect_smoke = true,
+    --                 direction = defines.direction.north,
+    --                 skip_fog_of_war = false
+    --         }
+    --     railbow_calculation.inventory.clear()
+    -- end
 
     iteration_state.last_step = i1
     if iteration_state.last_step == iteration_state.n_steps then
@@ -209,7 +284,7 @@ local function work()
             return
         end
     end
-
+    railbow_calculation.inventory.destroy()
     table.remove(storage.railbow_calculation_queue, 1)
 end
 
