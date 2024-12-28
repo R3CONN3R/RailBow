@@ -17,7 +17,7 @@ if script.active_mods["elevated-rails"] then
 	table.insert(rail_list, "rail-ramp")
 	for _, rail in pairs(base_rail_list) do
         table.insert(rail_list, "elevated-"..rail)
-    end  
+    end
 	log("elevated rails found and added")
 end
 
@@ -60,7 +60,10 @@ local function entity_pos_to_built_pos(entity)
 	end
 end
 
-local function set_up_calculation(player, e)
+---@param player LuaPlayer|any
+---@param event EventData|any
+---@param selection_tool_mode string
+local function set_up_calculation(player, event, selection_tool_mode)
     local selection_tool = storage.railbow_tools[player.index]
     local selected_preset = selection_tool.presets[selection_tool.selected_preset]
     local tiles = selected_preset.tiles
@@ -92,7 +95,7 @@ local function set_up_calculation(player, e)
         end
     end
 
-    local signals, rails = seperate_signals_and_rails(e.entities)
+    local signals, rails = seperate_signals_and_rails(event.entities)
 
     if #rails <= 0 then -- no need to go any further with no rails
         return
@@ -126,22 +129,7 @@ local function set_up_calculation(player, e)
         end
     end
 
-    local build_mode_def
     local entity_remove_filter = {}
-
-    if selected_preset.build_mode == nil or selected_preset.build_mode == 0 then
-        selected_preset.build_mode = 1
-    end
-
-    if selected_preset.build_mode == 1 then
-        build_mode_def = defines.build_mode.normal
-    elseif selected_preset.build_mode == 2 then
-        build_mode_def = defines.build_mode.forced
-    elseif selected_preset.build_mode == 3 then
-        build_mode_def = defines.build_mode.superforced
-    else
-        build_mode_def = defines.build_mode.normal
-    end
 
     if selected_preset.remove_trees then
         table.insert(entity_remove_filter, "tree")
@@ -160,39 +148,75 @@ local function set_up_calculation(player, e)
             calculation_complete = false
         },
         entity_remove_filter = entity_remove_filter,
-        build_mode_def = build_mode_def
+        mode = selection_tool_mode
     }
+
+    local rb_debug
+    if settings.get_player_settings(player)["railbow-debug"].value then rb_debug = true rendering.clear("RailBow-Refracted") end
 
     --- @type RailBowCalculation
     local railbow_calculation = {
         player_index = player.index,
-        inventory = game.create_inventory(1),
         mask_calculation = mask_calculation,
-        tile_calculation = tile_calculation
+        tile_calculation = tile_calculation,
+        rb_debug = rb_debug
     }
 
     table.insert(storage.railbow_calculation_queue, railbow_calculation)
 end
 
+---@param player any
+---@param event EventData|table
+local function check_valid(player, event)
+        if event.item ~= "railbow-selection-tool" then
+            return false
+        end
+        if not player then
+            return false
+        end
+        if settings.get_player_settings(player)["railbow-debug"].value then log(serpent.block(event.area)) end
+        rendering.clear("RailBow-Refracted")
+        if not next(event.entities) then
+            return false
+        end
+        return true
+    end
+
 ---@param event EventData.on_player_selected_area
 local function on_player_selected_area(event)
-    if event.item ~= "railbow-selection-tool" then
-        return
-    end
-    if not next(event.entities) then
-        return
-    end
     local player = game.get_player(event.player_index)
-    if not player then
-        return
-    end
-    set_up_calculation(player, event)
+    if not check_valid(player, event) then return end
+    set_up_calculation(player, event, "normal")
+end
+
+---@param event EventData.on_player_alt_selected_area
+local function on_player_alt_selected_area(event)
+    local player = game.get_player(event.player_index)
+    if not check_valid(player, event) then return end
+    set_up_calculation(player, event, "shift")
+end
+
+---@param event EventData.on_player_reverse_selected_area
+local function on_player_reverse_selected_area(event)
+    local player = game.get_player(event.player_index)
+    if not check_valid(player, event) then return end
+    set_up_calculation(player, event, "remove_tiles")
+end
+
+---@param event EventData.on_player_alt_reverse_selected_area
+local function on_player_alt_reverse_selected_area(event)
+    local player = game.get_player(event.player_index)
+    if not check_valid(player, event) then return end
+    set_up_calculation(player, event, "remove_ents")
 end
 
 local selection = {}
 
 selection.events = {
-    [defines.events.on_player_selected_area] = on_player_selected_area
+    [defines.events.on_player_selected_area] = on_player_selected_area,
+    [defines.events.on_player_alt_selected_area] = on_player_alt_selected_area,
+    [defines.events.on_player_reverse_selected_area] = on_player_reverse_selected_area,
+    [defines.events.on_player_alt_reverse_selected_area] = on_player_alt_reverse_selected_area
 }
 
 return selection

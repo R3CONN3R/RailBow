@@ -44,7 +44,7 @@ function lib.create_export_string_window(player)
     }
     frame.location = {75, 75}
 
-    gui_elements.main_title_bar(frame, "titles.export-preset")
+    gui_elements.main_title_bar(frame, "titles.railbow-export-preset")
 
     frame.add{
         type = "flow",
@@ -66,7 +66,7 @@ function lib.create_import_string_window(player)
     }
     frame.location = {75, 75}
 
-    gui_elements.main_title_bar(frame, "titles.import-preset")
+    gui_elements.main_title_bar(frame, "titles.railbow-import-preset")
 
     frame.add{
         type = "flow",

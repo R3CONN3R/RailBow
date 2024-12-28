@@ -21,6 +21,18 @@ local function open_gui(player)
     end
 end
 
+local function custom_input_open_gui(event)
+    local name = event.input_name
+    if name ~= "railbow-open-gui" then
+        return
+    end
+    local player = game.get_player(event.player_index)
+    if not player then
+        return
+    end
+    open_gui(player)
+end
+
 ---@param event EventData.on_gui_click
 local function gui_click(event)
     local element = event.element
@@ -28,7 +40,7 @@ local function gui_click(event)
     local player = game.get_player(event.player_index)
     if not player then return end
 
-    if element.get_mod() ~= "RailBow" then return end
+    if element.get_mod() ~= "RailBow-Refracted" then return end
     if element.name == "railbow_button" then
         open_gui(player)
     elseif element.name == "close_button" then
@@ -125,17 +137,6 @@ local function checked_state_changed(event)
     end
 end
 
----@param event EventData.on_gui_selection_state_changed
-local function selection_state_changed(event)
-    local element = event.element
-    local player_index = event.player_index
-    local player = game.get_player(player_index)
-    if not player then return end
-
-    if element.name == "build_mode_dropdown" then
-        interactions.dropdown_change_build_mode(player, element.selected_index)
-    end
-end
 
 local gui = {}
 
@@ -145,7 +146,7 @@ gui.events = {
     [defines.events.on_gui_closed] = gui_closed,
     [defines.events.on_gui_confirmed] = text_changed,
     [defines.events.on_gui_checked_state_changed] = checked_state_changed,
-    [defines.events.on_gui_selection_state_changed] = selection_state_changed,
+    ["railbow-open-gui"] = custom_input_open_gui
 }
 
 return gui
