@@ -245,25 +245,6 @@ function lib.elem_choose_header(frame)
         state = false,
         mouse_button_filter = {"left"}
     }
-    local build_mode_dropdown = header.add{
-        type = "drop-down",
-        name = "build_mode_dropdown",
-        tooltip = {"tooltips.railbow-build-mode"},
-        caption = {"dropdown.railbow-build-mode"},
-        default_value = "normal",
-        items = {"normal", "forced", "superforced"},
-        mouse_button_filter = {"left"}
-    }
-    -- TODO: shift to the far right
-
-    build_mode_dropdown.style.width = 200
-
-    local build_mode = railbow_tool.presets[railbow_tool.opened_preset].build_mode
-
-    if build_mode == 0 then build_mode = 1 ; railbow_tool.presets[railbow_tool.opened_preset].build_mode = 1 end
-
-    build_mode_dropdown.selected_index = build_mode
-
     if railbow_tool.presets[railbow_tool.opened_preset].remove_trees then
         remove_trees_checkbox.state = true
     end
@@ -354,9 +335,12 @@ function lib.export_string_input(frame)
     if not player then return end
     local railbow_tool = util.table.deepcopy(storage.railbow_tools[player.index])
     local preset = railbow_tool.presets[railbow_tool.opened_preset]
+    log("export_preset____________________________________-")
+    log(serpent.block(preset))
+    log("export_json____________________________________-")
     local json = helpers.table_to_json(preset)
     ---@TODO export or import for tiles borked for some reason
-    --game.print(serpent.block(json))
+    log(serpent.block(json))
     local exchange_string = helpers.encode_string(json)
 
     local input = frame.add{

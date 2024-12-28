@@ -1,15 +1,12 @@
 local gui_elements = require("scripts.gui_elements")
----@ diagnostic disable-next-line: different-requires
---local util = require("__core__.lualib.util")
 
 local lib = {}
 ---@param player LuaPlayer
 ---@param tiles table<integer, string>|nil
 ---@param preset_name string|nil
----@param build_mode int|nil
 ---@param remove_trees boolean
 ---@param remove_cliffs boolean
-function lib.add_preset(player, tiles, preset_name, build_mode, remove_trees, remove_cliffs)
+function lib.add_preset(player, tiles, preset_name, remove_trees, remove_cliffs)
     local railbow_tool = storage.railbow_tools[player.index]
     local presets = railbow_tool.presets
     local n_presets = #presets
@@ -22,29 +19,14 @@ function lib.add_preset(player, tiles, preset_name, build_mode, remove_trees, re
         preset_name = "preset_" .. n_presets + 1
     end
 
-    if not build_mode then
-        if settings.get_player_settings(player)["railbow-default-build-mode"] ~= nil then
-            local bm = settings.get_player_settings(player)["railbow-default-build-mode"].value
-            if bm == "normal" then
-                build_mode = 1
-            elseif bm == "forced" then
-                build_mode = 2
-            elseif bm == "superforced" then
-                build_mode = 3
-            end
-        else
-            build_mode = 1
-        end
-    end
-
-    if not remove_trees then
+    if remove_trees == nil then
         if settings.get_player_settings(player)["railbow-default-remove-trees"] ~= nil then
             ---@diagnostic disable-next-line: cast-local-type
             remove_trees = settings.get_player_settings(player)["railbow-default-remove-trees"].value
         end
     end
 
-    if not remove_cliffs then
+    if remove_cliffs == nil then
         if settings.get_player_settings(player)["railbow-default-remove-cliffs"] ~= nil then
             ---@diagnostic disable-next-line: cast-local-type
             remove_cliffs = settings.get_player_settings(player)["railbow-default-remove-cliffs"].value
@@ -55,7 +37,6 @@ function lib.add_preset(player, tiles, preset_name, build_mode, remove_trees, re
         name = preset_name,
         tiles = tiles,
         mode = "vote",
-        build_mode = build_mode,
         remove_trees = remove_trees,
         remove_cliffs = remove_cliffs
     }
@@ -132,9 +113,6 @@ function lib.change_opened_preset(player, index, toggled)
         railbow_tool.presets[index].tiles = {}
     end
 
-    if not railbow_tool.presets[index].build_mode or railbow_tool.presets[index].build_mode == 0 then
-        railbow_tool.presets[index].build_mode = 1
-    end
     if not railbow_tool.presets[index].remove_trees then
         railbow_tool.presets[index].remove_trees = false
     end
@@ -148,7 +126,6 @@ function lib.change_opened_preset(player, index, toggled)
     frame.header.preset_name.text = railbow_tool.presets[index].name
     frame.header.remove_trees_checkbox.state = railbow_tool.presets[index].remove_trees
     frame.header.remove_cliffs_checkbox.state = railbow_tool.presets[index].remove_cliffs
-    frame.header.build_mode_dropdown.selected_index = railbow_tool.presets[index].build_mode
 
     for i, element in pairs(frame.table.children) do
         if string.find(element.name, "tile_selector_") then
@@ -197,33 +174,20 @@ function lib.delete_preset(player)
 end
 
 --- @param player LuaPlayer
---- @param selection_index int
-function lib.dropdown_change_build_mode(player, selection_index)
-    local railbow_tool = storage.railbow_tools[player.index]
-    local opened_preset = railbow_tool.opened_preset
-    if not opened_preset then return end
-    local presets = railbow_tool.presets
-    
-    presets[opened_preset].build_mode = selection_index
-end
---- @param player LuaPlayer
 --- @param state boolean
 function lib.toggle_remove_trees(player, state)
     local railbow_tool = storage.railbow_tools[player.index]
     local opened_preset = railbow_tool.opened_preset
-    if not opened_preset then return end
     local presets = railbow_tool.presets
-
     presets[opened_preset].remove_trees = state
 end
+
 --- @param player LuaPlayer
 --- @param state boolean
 function lib.toggle_remove_cliffs(player, state)
     local railbow_tool = storage.railbow_tools[player.index]
     local opened_preset = railbow_tool.opened_preset
-    if not opened_preset then return end
     local presets = railbow_tool.presets
-
     presets[opened_preset].remove_cliffs = state
 end
 
@@ -238,7 +202,6 @@ function lib.copy_preset(player)
         name = presets[opened_preset].name .. " - copy",
         tiles = util.table.deepcopy(presets[opened_preset].tiles),
         mode = "vote",
-        build_mode = presets[opened_preset].build_mode,
         remove_trees_and_rocks = presets[opened_preset].remove_trees,
         remove_cliffs = presets[opened_preset].remove_cliffs
 
@@ -290,7 +253,12 @@ function lib.import_preset(player)
         player.print("[color=red]Error: Invalid import string, not a json.[/color]")
         return
     end
+    log("import_json____________________________________-")
+    log(serpent.block(json))
+    local exchange_string = helpers.encode_string(json)
+    log("import_preset____________________________________-")
     local preset = helpers.json_to_table(json)
+    log(serpent.block(preset))
     if not preset then
         player.print("[color=red]Error: Invalid import string, not a table.[/color]")
         return
@@ -302,11 +270,13 @@ function lib.import_preset(player)
     local tiles = {}
     for i, tile in pairs(preset.tiles) do
         j = tonumber(i)
+        log(serpent.block(j))
         if j then
-            tiles[j] ="invalid" --- tile
+            tiles[j] = tile--"invalid" --- tile
         end
     end
-    lib.add_preset(player, tiles, preset.name, preset.build_mode, preset.remove_trees, preset.remove_cliffs)
+    log(serpent.block(tiles))
+    lib.add_preset(player, tiles, preset.name, preset.remove_trees, preset.remove_cliffs)
 end
 
 return lib

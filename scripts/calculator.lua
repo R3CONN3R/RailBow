@@ -18,8 +18,8 @@ local function do_mask_accumulation(railbow_calculation)
 
     if mask_calculation.rails[1] == nil then           -- prevent crash when only selecting rail signal
         iteration_state.calculation_complete = true
-		return railbow_calculation
-	end
+        return railbow_calculation
+    end
 
     local rail_calculations_per_tick = settings.global["railbow-rail-calculations-per-tick"].value
 
@@ -31,14 +31,10 @@ local function do_mask_accumulation(railbow_calculation)
     local tile_max = mask_calculation.tiles_max
     local tile_map = mask_calculation.tile_map
     local tile_array = mask_calculation.tile_array
-    local offset = not railbow_calculation.tile_calculation.instant_build
 
     for i = i0, i1 do
         local entity = mask_calculation.rails[i]
         local pos_i = entity_pos_to_built_pos(entity)
-        -- if offset then
-        --     pos_i = math2d.position.subtract(entity_pos_to_built_pos(entity), p0)
-        -- end
         local mask = masks[entity.name]
         if mask then
             mask = mask[entity.direction]
@@ -80,6 +76,58 @@ local function do_mask_accumulation(railbow_calculation)
     railbow_calculation.mask_calculation = mask_calculation
     return railbow_calculation
 end
+
+---@param tile Tile
+---@param railbow_calculation RailBowCalculation
+---@param area_size integer
+local function remove_environmental_single(tile, railbow_calculation, area_size)
+
+
+    local surface = railbow_calculation.mask_calculation.rails[1].surface
+    local player = game.players[railbow_calculation.player_index]
+    tile_pos1 = math2d.position.add(tile.position, {-area_size, -area_size})
+    tile_pos2 = math2d.position.add(tile.position, {area_size, area_size}) -- make a area_size*2 square area to find entities in
+
+    if railbow_calculation.rb_debug then
+        rendering.draw_rectangle{
+            color={0, 0, 1, 0.2},--rgba
+            left_top=tile_pos1,
+            right_bottom=tile_pos2,
+            surface=surface,time_to_live=3600,--60 seconds
+            draw_on_ground=true
+        }
+    end
+
+    if #railbow_calculation.tile_calculation.entity_remove_filter == 0 then return end
+    wald = surface.find_entities_filtered
+    {
+        area = {tile_pos1, tile_pos2},
+        type = railbow_calculation.tile_calculation.entity_remove_filter
+    }
+
+    for _, eiche in pairs(wald) do
+        if eiche ~= nil and eiche.valid then
+            if not (eiche.type == "simple-entity" and not eiche.prototype.count_as_rock_for_filtered_deconstruction)
+            then
+                if railbow_calculation.rb_debug then rendering.draw_circle {
+                    color={0,1,0,0.1},
+                    radius=0.1,
+                    filled=true,
+                    target=eiche.position,
+                    surface = surface,
+                    time_to_live=3600--60 seconds
+                } end
+
+                if railbow_calculation.tile_calculation.instant_build then
+                    eiche.destroy()
+                else
+                    eiche.order_deconstruction(player.force, player)
+                end
+            end
+        end
+    end
+end
+
 
 --- @param tile_weights table<integer, number>
 --- @return integer
@@ -135,98 +183,100 @@ local methods = {
     nearest = nearest_tile
 }
 
+---@param field table
+---@param key string
+local function field_contains(field, key)
+    return field[key] ~= nil
+end
+
 ---@param railbow_calculation RailBowCalculation
 ---@return RailBowCalculation
 local function do_tile_picking(railbow_calculation)
     local mask_calculation = railbow_calculation.mask_calculation
     local tile_calculation = railbow_calculation.tile_calculation
 
-    local iteration_state = tile_calculation.iteration_state
     local blueprint_tiles = {}
     local tile_map = mask_calculation.tile_map
-    local tile_array = mask_calculation.tile_array
     local tiles = mask_calculation.tiles
-
-    local tile_calculations_per_tick = settings.global["railbow-tile-calculations-per-tick"].value
-    local i0 = iteration_state.last_step + 1
-    local i1 = math.min(iteration_state.last_step + tile_calculations_per_tick, iteration_state.n_steps)
-
 
     local surface = mask_calculation.rails[1].surface
     local player = game.players[railbow_calculation.player_index]
     local force = player.force
+    local rb_debug = railbow_calculation.rb_debug
 
+    local tile_calculations_per_tick
+    local iteration_state = tile_calculation.iteration_state
+    if rb_debug then tile_calculations_per_tick = 10 else
+    tile_calculations_per_tick = settings.global["railbow-tile-calculations-per-tick"].value end
+    local i0 = iteration_state.last_step + 1
+    local i1 = math.min(iteration_state.last_step + tile_calculations_per_tick, iteration_state.n_steps)
+
+
+    local tile_array = mask_calculation.tile_array
     for i = i0, i1 do
         local pos = {x = tile_array[i][1], y = tile_array[i][2]}
-        local tile_weights = tile_map[pos.x][pos.y]
+        local tile_weights = mask_calculation.tile_map[pos.x][pos.y]
         local d = methods.vote(tile_weights)
-        local name = tiles[d]
+        local name = mask_calculation.tiles[d]
         if name then
             table.insert(blueprint_tiles, {name = name, position = pos})
+            remove_environmental_single({name = name, position = pos}, railbow_calculation, 2)
         end
     end
 
-    -- local player = game.players[railbow_calculation.player_index]
-    -- local force = player.force
-    -- local surface = mask_calculation.rails[1].surface
-    local tile_pos1 = {}
-    local tile_pos2 = {}
-    local pos_rail = mask_calculation.rails[1].position
-    --local offset = not tile_calculation.instant_build
+    local build_mode = tile_calculation.mode
 
-    if #tile_calculation.entity_remove_filter >= 1 then -- only run when there is something in the filter
-        for _, rockandstone in pairs(blueprint_tiles) do
-            -- if not offset then-- add the relative position(offset) from the bp tile to the absolute position of the rail/bp origin
-            --     tile_pos1 = math2d.position.add(pos_rail, rockandstone.position) 
-            -- else-- position is already absolute just need the slight deviation to get the center of the tile
-                tile_pos1 = math2d.position.add(rockandstone.position, {-0.5, -0.5}) 
-            -- end
-            tile_pos1 = math2d.position.add(tile_pos1, {-1, -1})
-            tile_pos2 = math2d.position.add(tile_pos1, {2, 2}) -- make a 2x2 square area to find entities in
-            wald = surface.find_entities_filtered
-                {
-                    area = {tile_pos1, tile_pos2},
-                    type = tile_calculation.entity_remove_filter
-                }
-            for _, eiche in pairs(wald) do
-                if eiche ~= nil then
-                    if eiche.valid then
-                        if    (eiche.type == "simple-entity" and eiche.prototype.count_as_rock_for_filtered_deconstruction)
-                            or eiche.type == "tree"
-                            or eiche.type == "cliff"
-                        then
-                            if not tile_calculation.instant_build then
-                                eiche.order_deconstruction(force, player)
-                            else
-                                eiche.destroy()
-                            end
-                        end
-                    end
+    if tile_calculation.instant_build and (build_mode == "normal" or build_mode == "shift") then
+            surface.set_tiles(blueprint_tiles,true,false,true,false,player,0)
+    else
+        local old_tile = nil
+        local default_cover = nil
+        local foundation_built = false
+        local skip_placement = false
+
+        for _, new_tile in pairs(blueprint_tiles) do
+            skip_placement = false
+            old_tile = surface.get_tile(new_tile.position.x, new_tile.position.y)
+            for _, tile_ghost in pairs(old_tile.get_tile_ghosts()) do
+                if tile_ghost.ghost_name == new_tile.name then
+                    tile_ghost.cancel_deconstruction(force, player)
+                    skip_placement = true
+                end
+                if (build_mode == "remove_tiles") then
+                    tile_ghost.order_deconstruction(force,player)
+                    tile_ghost.destroy()
                 end
             end
-        end
-    end
 
-    if tile_calculation.instant_build then
-        surface.set_tiles {
-            tiles = blueprint_tiles,
-            correct_tiles = true,
-            remove_colliding_entities = true,
-            remove_colliding_decoratives = true,
-            raise_event = false,
-            player = player,
-            undo_index = 0
-        }
-    else
-        for _, tile in pairs(blueprint_tiles) do
-            old_tile = surface.get_tile(tile.position.x, tile.position.y)
-            if old_tile ~= nil then
-                if old_tile.name ~= tile.name then
+            if (old_tile.name == new_tile.name) and (build_mode == "normal" or build_mode == "shift") then
+                    old_tile.cancel_deconstruction(force, player)
+                skip_placement = true
+            end
+
+            if (build_mode == "remove_tiles") then
+                old_tile.order_deconstruction(force, player)
+            elseif (not skip_placement) and (build_mode == "normal" or build_mode == "shift") then
+                default_cover = old_tile.prototype.default_cover_tile
+                if (build_mode == "shift" and default_cover ~= nil) then
                     surface.create_entity {
                         name        = "tile-ghost",
-                        inner_name  = tile.name,
-                        position    = tile.position,
+                        inner_name  = default_cover.name,
+                        position    = new_tile.position,
                         force       = player.force,
+                        remove_colliding_decoratives = true,
+                        player      = player,
+                        raise_built = true
+                    }
+                    foundation_built = true
+                end
+
+                if field_contains(old_tile.prototype.collision_mask.layers, "ground_tile") or foundation_built then
+                    surface.create_entity {
+                        name        = "tile-ghost",
+                        inner_name  = new_tile.name,
+                        position    = new_tile.position,
+                        force       = player.force,
+                        remove_colliding_decoratives = true,
                         player      = player,
                         raise_built = true
                     }
@@ -234,27 +284,6 @@ local function do_tile_picking(railbow_calculation)
             end
         end
     end
-    -- elseif false then -- overhauled but old blueprint method. but i couldnt find a way to add it to the player.undo_redo_stack
-    --     railbow_calculation.inventory.insert({name = "blueprint", count = 1})
-    --     local blueprint = railbow_calculation.inventory[1]
-    --     blueprint.blueprint_absolute_snapping = true
-    --     blueprint.blueprint_snap_to_grid = {x = 1, y = 1}
-    --     blueprint.blueprint_position_relative_to_grid = { x = 0, y = 0 }
-    --     blueprint.set_blueprint_tiles(blueprint_tiles)
-    --     local ghosts =
-    --         blueprint.build_blueprint{
-    --                 surface = surface,
-    --                 force = force,
-    --                 position = mask_calculation.p0,
-    --                 build_mode = tile_calculation.build_mode_def,
-    --                 by_player = player,
-    --                 create_build_effect_smoke = true,
-    --                 direction = defines.direction.north,
-    --                 skip_fog_of_war = false
-    --         }
-    --     railbow_calculation.inventory.clear()
-    -- end
-
     iteration_state.last_step = i1
     if iteration_state.last_step == iteration_state.n_steps then
         iteration_state.calculation_complete = true
@@ -284,7 +313,6 @@ local function work()
             return
         end
     end
-    railbow_calculation.inventory.destroy()
     table.remove(storage.railbow_calculation_queue, 1)
 end
 

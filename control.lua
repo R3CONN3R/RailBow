@@ -20,19 +20,18 @@ local mod_gui = require("mod-gui")
 --- @class TileCalculation
 --- @field instant_build boolean
 --- @field entity_remove_filter table<string>
---- @field build_mode_def defines.build_mode
+--- @field mode string
 --- @field iteration_state IterationState
 
 --- @class RailBowCalculation
 --- @field player_index integer
---- @field inventory LuaInventory
 --- @field mask_calculation MaskCalculation
 --- @field tile_calculation TileCalculation
+--- @field rb_debug boolean
 
 --- @class RailBowConfig
 --- @field name string
 --- @field tiles table<integer, string>
---- @field build_mode int
 --- @field remove_trees boolean
 --- @field remove_cliffs boolean
 
@@ -60,7 +59,6 @@ local function initialize_global(player)
             name = "default",
             tiles = init_tiles,
             mode = "vote",
-            build_mode = 1,
             remove_trees = true,
             remove_cliffs = false
         }
@@ -115,18 +113,18 @@ local function on_init()
     end
 end
 
+
 local control = {}
 
 control.on_init = on_init
 
 control.events = {
     [defines.events.on_player_created] = on_player_created,
-    [defines.events.on_player_removed] = on_player_removed,
+    [defines.events.on_player_removed] = on_player_removed
 }
 
 handler.add_libraries({
     control,
-    require("scripts.shortcut"),
     require("scripts.selection"),
     require("scripts.gui"),
     require("scripts.calculator"),
